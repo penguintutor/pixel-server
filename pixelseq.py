@@ -3,6 +3,7 @@ import _rpi_ws281x as ws
 from pixelconfig import PixelConfig
 from flask import json
 import re
+import math
 
 
 # Defines the sequences available for pixelserver
@@ -36,6 +37,16 @@ class SeqList():
              "title": "Chaser",
              "description" : "Flash all LEDs on and off",
              "group" : 0
+             },
+             {"seq_name" :"chaserchangecolor",
+             "title": "Chaser Change Color",
+             "description" : "Flash all LEDs on and off",
+             "group" : 1
+             },
+             {"seq_name" :"chaserbackground",
+             "title": "Chaser Solid Background",
+             "description" : "Chaser sequence one block of colour across black background",
+             "group" : 1
              }
             ]
     # Return list of sequences in json format      
@@ -107,7 +118,9 @@ class PixelSeq():
             'allon' : self.allOn,
             'alloff' : self.allOff,
             'flash' : self.flash,
-            'chaser' : self.chaser
+            'chaser' : self.chaser,
+            'chaserchangecolor' : self.chaserChangeColor,
+            'chaserbackground' : self.chaserBackground
             }
         
         self.strip = PixelStrip (
@@ -182,25 +195,80 @@ class PixelSeq():
             self.strip.setPixelColor(i, colors[color_pos])
             color_pos += 1
         self.strip.show()
-        return self._chaser_seq_inc (seq_position, len(colors)-1, reverse)
+        if (reverse == False):
+            return self._seq_dec (seq_position, len(colors)-1)
+        else:
+            return self._seq_inc (seq_position, len(colors)-1)
+        
+        
+    # Chaser using only a single color at a time
+    # shows 4 LEDs on by 4 LEDs off
+    # If number of pixels is divisible by 8 then change on single block
+    # otherwise may change in a block of colors
+    def chaserChangeColor (self, seq_position, reverse, colors):
+        current_color = math.floor(seq_position / self.strip.numPixels())
+        #print ("Seq Num "+str(seq_position)+" Pixel color "+str(pixel_color))
+        for i in range (0, self.strip.numPixels()):
+            if ((i%8 >= seq_position %8 and i%8 < seq_position%8 + 4) or 
+                    (i%8 >= seq_position%8 -7 and i%8 <= seq_position%8 -5)):
+                if (i < seq_position - (self.strip.numPixels() * current_color)):
+                    pixel_color = current_color + 1
+                    if (pixel_color >= len(colors)) :
+                        pixel_color = 0
+                else:
+                    pixel_color = current_color
+                
+                self.strip.setPixelColor(i, colors[pixel_color])
+            else:
+                self.strip.setPixelColor(i, Color(0,0,0))
+        self.strip.show()
+        if (reverse == True):
+            return self._seq_dec (seq_position, len(colors)*self.strip.numPixels()-1)
+        else:
+            return self._seq_inc (seq_position, len(colors)*self.strip.numPixels()-1)
+        
+        
+    # chaser with black background
+    # If multiple colours then a single block of colours goes across the strip
+    # If single color selected then show 4 LEDs on, followed by 4 LEDs off
+    def chaserBackground(self, seq_position, reverse, colors):
+        # if single color selected then create a separate array with 4 x colors
+        if (len(colors) < 2):
+            chase_colors = [colors[0], colors[0], colors[0], colors[0]]
+        else :
+            chase_colors = colors
+        for i in range (0, self.strip.numPixels()):
+            if (i >= seq_position and i < seq_position + len(chase_colors)):
+                pixel_color = chase_colors[i - seq_position]
+            elif (i < seq_position - self.strip.numPixels() + len(chase_colors)):
+                pixel_color = chase_colors[self.strip.numPixels() - seq_position + i]
+            else:
+                pixel_color = Color(0,0,0)
+            self.strip.setPixelColor(i, pixel_color)
+        self.strip.show()
+        
+        if (reverse == True):
+            return self._seq_dec (seq_position, self.strip.numPixels()-1)
+        else:
+            return self._seq_inc (seq_position, self.strip.numPixels()-1)
+        
         
 
     # Helper functions 
-    # Increment or decrement seq_position based on reverse = true / false
+    # Increment or decrement seq_position 
     # Used by chaser methods
-    def _chaser_seq_inc (self, seq_position, max_pos, reverse):
-        # for chaser decrement by default
-        if (reverse == False) :
-            seq_position -= 1
-            if (seq_position < 0):
-                seq_position = max_pos
-        else :
-            seq_position += 1
-            if (seq_position > max_pos):
-                seq_position = 0
+    def _seq_inc (self, seq_position, max_pos):
+        seq_position += 1
+        if (seq_position > max_pos):
+            seq_position = 0
         return seq_position
                     
-            
+    # Used by other methods
+    def _seq_dec (self, seq_position, max_pos):
+        seq_position -= 1
+        if (seq_position < 0):
+            seq_position = max_pos
+        return seq_position     
     
     # Increment or decrement color based on reverse = true / false
     def _color_inc (self, current_color, num_colors, reverse):
