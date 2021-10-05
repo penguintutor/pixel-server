@@ -4,6 +4,7 @@ from pixelconfig import PixelConfig
 from flask import json
 import re
 import math
+import random
 
 
 # Defines the sequences available for pixelserver
@@ -26,6 +27,11 @@ class SeqList():
             {"seq_name" :"allon",
              "title": "All On",
              "description" : "Turn all LEDs on",
+             "group" : 0
+             },
+            {"seq_name" :"random",
+             "title": "Random",
+             "description" : "Random sequences",
              "group" : 0
              },
             {"seq_name" :"flash",
@@ -54,6 +60,8 @@ class SeqList():
              "group" : 1
              }
             ]
+            
+            
     # Return list of sequences in json format      
     def json (self):
         sequences = []
@@ -118,10 +126,14 @@ class PixelSeq():
     
     def __init__ (self, pixel_config):
         self.pixel_config = pixel_config
+        self.seq_list = SeqList()
+        # Used by randSeq method for tracking sequence
+        self.randseq = ""
         
         self.seq_methods = {
-            'allon' : self.allOn,
             'alloff' : self.allOff,
+            'allon' : self.allOn,
+            'random' : self.randomSeq,
             'flash' : self.flash,
             'chaser' : self.chaser,
             'chaserchangecolor' : self.chaserChangeColor,
@@ -152,7 +164,7 @@ class PixelSeq():
         # increment seq_position (used to detect full seq complete)
         seq_position += 1
         # max seq_position is how long sequence lasts
-        if seq_position > 5:
+        if seq_position > 10:
             seq_position = 0
         return seq_position
     
@@ -170,7 +182,7 @@ class PixelSeq():
         # increment seq_position (used to detect full seq complete)
         seq_position += 1
         # max seq_position is how long sequence lasts
-        if seq_position > 10:
+        if seq_position > 20:
             seq_position = 0
         return seq_position
 
@@ -183,15 +195,16 @@ class PixelSeq():
             color_pos = len(colors) - 1
         for i in range (0, self.strip.numPixels()):
             # If flash off then set to off
-            if (seq_position != 0) :
+            if (seq_position % 2 == 1) :
                 self.strip.setPixelColor(i, Color(0,0,0))
             else:
                 self.strip.setPixelColor(i, colors[color_pos])
                 color_pos = self._color_inc (color_pos, len(colors), reverse)
         self.strip.show()
-        if (seq_position != 0) :
-            return 0
-        return 1
+        seq_position += 1
+        if (seq_position > 20) :
+            seq_position = 0
+        return seq_position
 
     # Chaser - moves LEDs to left or right
     # Only uses colours specified unless only one color in which case use second as black
@@ -199,22 +212,23 @@ class PixelSeq():
     # forward direction is moving away from first pixel
     # reverse direction moves towards first pixel
     def chaser(self, seq_position, reverse, colors):
-        if (len(colors) < 2) :
-            colors.append(Color(0,0,0))
+        chase_colors = colors.copy()
+        if (len(chase_colors) < 2) :
+            chase_colors.append(Color(0,0,0))
             
         # seq_position indicates where to start in colors array
         color_pos = seq_position
         for i in range (0, self.strip.numPixels()):
             # if past last color then reset to 0
-            if (color_pos >= len(colors)):
+            if (color_pos >= len(chase_colors)):
                 color_pos = 0
-            self.strip.setPixelColor(i, colors[color_pos])
+            self.strip.setPixelColor(i, chase_colors[color_pos])
             color_pos += 1
         self.strip.show()
         if (reverse == False):
-            return self._seq_dec (seq_position, len(colors)-1)
+            return self._seq_dec (seq_position, len(chase_colors)-1)
         else:
-            return self._seq_inc (seq_position, len(colors)-1)
+            return self._seq_inc (seq_position, len(chase_colors)-1)
         
         
     # Chaser using only a single color at a time
@@ -223,7 +237,6 @@ class PixelSeq():
     # otherwise may change in a block of colors
     def chaserChangeColor (self, seq_position, reverse, colors):
         current_color = math.floor(seq_position / self.strip.numPixels())
-        #print ("Seq Num "+str(seq_position)+" Pixel color "+str(pixel_color))
         for i in range (0, self.strip.numPixels()):
             if ((i%8 >= seq_position %8 and i%8 < seq_position%8 + 4) or 
                     (i%8 >= seq_position%8 -7 and i%8 <= seq_position%8 -5)):
@@ -316,6 +329,18 @@ class PixelSeq():
             return 0
         else :
             return seq_position + 1
+            
+    # choose a sequence at random
+    # change when each reaches 0
+    def randomSeq(self, seq_position, reverse, colors):
+        if (seq_position == 0):
+            # if choose random then try again until get a different sequence
+            while 1:
+                seq_num = random.randint(0,len(self.seq_list.pixel_sequences)-1)
+                self.randseq = self.seq_list.pixel_sequences[seq_num]['seq_name']
+                if (self.randseq != "random"):
+                    break
+        return self.seq_methods[self.randseq](seq_position, reverse, colors)
         
 
     # Helper functions 
