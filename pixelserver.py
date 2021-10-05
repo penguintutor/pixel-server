@@ -116,5 +116,4 @@ if __name__ == "__main__":
     ft = threading.Thread(target=flaskThread)
     mt.start()
     ft.start()
-    #mt.join()
-    #ft.join()
+

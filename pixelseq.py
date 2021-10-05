@@ -47,6 +47,11 @@ class SeqList():
              "title": "Chaser Solid Background",
              "description" : "Chaser sequence one block of colour across black background",
              "group" : 1
+             },
+             {"seq_name" :"chaserfillend",
+             "title": "Chaser Fill End",
+             "description" : "Single LED chaser to end and then fill up",
+             "group" : 1
              }
             ]
     # Return list of sequences in json format      
@@ -120,7 +125,8 @@ class PixelSeq():
             'flash' : self.flash,
             'chaser' : self.chaser,
             'chaserchangecolor' : self.chaserChangeColor,
-            'chaserbackground' : self.chaserBackground
+            'chaserbackground' : self.chaserBackground,
+            'chaserfillend' : self.chaserFillEnd
             }
         
         self.strip = PixelStrip (
@@ -143,6 +149,11 @@ class PixelSeq():
         for i in range (0, self.strip.numPixels()):
             self.strip.setPixelColor (i, Color(0,0,0))
         self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 1
+        # max seq_position is how long sequence lasts
+        if seq_position > 5:
+            seq_position = 0
         return seq_position
     
     def allOn(self, seq_position, reverse, colors):
@@ -156,6 +167,11 @@ class PixelSeq():
             self.strip.setPixelColor(i, colors[color_pos])
             color_pos = self._color_inc (color_pos, len(colors), reverse)
         self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 1
+        # max seq_position is how long sequence lasts
+        if seq_position > 10:
+            seq_position = 0
         return seq_position
 
     def flash(self, seq_position, reverse, colors):
@@ -251,10 +267,59 @@ class PixelSeq():
             return self._seq_dec (seq_position, self.strip.numPixels()-1)
         else:
             return self._seq_inc (seq_position, self.strip.numPixels()-1)
+            
+            
+    def chaserFillEnd(self, seq_position, reverse, colors):
+        working_seq = seq_position  # use to calculate how far in sequence
+        static_leds = 0             #  how many leds from end are static color
+        num_pixels = self.strip.numPixels() # saves lots of method calls
+        end_pixel = num_pixels      # current end of pixels (when calc pixel)
         
+        current_color = 0
+        moving_color = 0 # set to 0, but change later
+        
+        # loop across all static pixels
+        while (working_seq > end_pixel and end_pixel > 0) :
+            working_seq -= end_pixel
+            end_pixel -= 1
+            static_leds += 1
+            
+        
+        # now have number of leds to light at end (static) 
+        # and which led to light as moving up 
+        # light up the static leds, turn all other LEDs off
+        for i in range (0, num_pixels):
+            if (i >= num_pixels - static_leds):
+                # if revse then go from far end instead of nearest
+                if (reverse == True):
+                    self.strip.setPixelColor (num_pixels -i -1, colors[current_color])
+                else :
+                    self.strip.setPixelColor(i, colors[current_color])
+            else:
+                if (reverse == True):
+                    self.strip.setPixelColor(num_pixels -i -1, Color(0,0,0))
+                else:
+                    self.strip.setPixelColor(i, Color(0,0,0))
+            # If last non-static (if so use for color of moving)
+            if (i == num_pixels - static_leds -1):
+                moving_color = current_color
+            # increment color
+            current_color = self._color_inc (current_color, len(colors), reverse)
+            # Set moving pixel to the determined color
+            if (working_seq > 0):
+                if (reverse == True):
+                    self.strip.setPixelColor(num_pixels - working_seq, colors[moving_color])
+                else:
+                    self.strip.setPixelColor(working_seq -1, colors[moving_color])
+        self.strip.show()
+        if (static_leds >= num_pixels) :
+            return 0
+        else :
+            return seq_position + 1
         
 
     # Helper functions 
+    ######################################################
     # Increment or decrement seq_position 
     # Used by chaser methods
     def _seq_inc (self, seq_position, max_pos):
