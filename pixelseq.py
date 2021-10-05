@@ -60,7 +60,21 @@ class SeqList():
              "group" : 1
              }
             ]
-            
+        # default colors (can use any color, but these are default for chooing from)
+        # used by random
+        self.def_colors = [
+                Color(255,255,255),
+                Color(32,32,32),
+                Color(255,0,0),
+                Color(255,192,203),
+                Color(0,128,0),
+                Color(75,277,90),
+                Color(0,0,255),
+                Color(0,255,255),
+                Color(192,0,192),
+                Color(255,165,0),
+                Color(0,0,0)
+            ]
             
     # Return list of sequences in json format      
     def json (self):
@@ -129,6 +143,7 @@ class PixelSeq():
         self.seq_list = SeqList()
         # Used by randSeq method for tracking sequence
         self.randseq = ""
+        self.randcolors = []
         
         self.seq_methods = {
             'alloff' : self.allOff,
@@ -340,7 +355,16 @@ class PixelSeq():
                 self.randseq = self.seq_list.pixel_sequences[seq_num]['seq_name']
                 if (self.randseq != "random"):
                     break
-        return self.seq_methods[self.randseq](seq_position, reverse, colors)
+            # if default color when select new colors
+            if (len(colors) == 1 and colors[0] == Color(255,255,255)):
+                self.randcolors.clear()
+                # add 4 random colors
+                for i in range (0, 4):
+                    randcol_pos = random.randint(0, len(self.seq_list.def_colors)-1)
+                    self.randcolors.append(self.seq_list.def_colors[randcol_pos])
+            else:
+                self.randcolors = colors.copy()
+        return self.seq_methods[self.randseq](seq_position, reverse, self.randcolors)
         
 
     # Helper functions 
