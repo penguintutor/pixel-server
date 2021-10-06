@@ -345,6 +345,8 @@ class PixelSeq():
         else :
             return seq_position + 1
             
+    # from first pixel to last add LeD at a time then stay lit
+            
     # choose a sequence at random
     # change when each reaches 0
     def randomSeq(self, seq_position, reverse, colors):
