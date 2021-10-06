@@ -1,0 +1,13 @@
+[Unit]
+Description=Wireless pixelstrip server
+After=sshd.service
+
+[Service]
+WorkingDirectory=/home/pi/pixel-server
+ExecStart=/home/pi/pixel-server/pixelserver.py
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+
