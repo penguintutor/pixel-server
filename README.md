@@ -32,18 +32,18 @@ It is recommended to install directly from git, which will allow for install of 
 
 On a Raspberry Pi, open a terminal and enter the following commands:
 
-git clone https://github.com/penguintutor/pixel-server.git 
+    git clone https://github.com/penguintutor/pixel-server.git 
 
 Then to have it start automatically run the following:
 
-sudo cp /home/pi/pixel-server/pixelserver.service /etc/systemd/system/
-sudo chown root:root /etc/systemd/system/pixelserver.service
-sudo chmod 644 /etc/systemd/system/pixelserver.service
+    sudo cp /home/pi/pixel-server/pixelserver.service /etc/systemd/system/
+    sudo chown root:root /etc/systemd/system/pixelserver.service
+    sudo chmod 644 /etc/systemd/system/pixelserver.service
 
 Enable using:
 
-sudo systemctl start pixelserver.service
-sudo systemctl enable pixelserver.service
+    sudo systemctl start pixelserver.service
+    sudo systemctl enable pixelserver.service
 
 For more information see: <http://www.penguintutor.com/raspberrypi/startup>
 
