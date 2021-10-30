@@ -43,11 +43,11 @@ def js():
     return render_template('pixels.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
     
 @app.route("/jquery.min.js")
-def js():
+def jquery():
     return render_template('jquery.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
    
 @app.route("/jqueryui.min.js")
-def js():
+def jqueryui():
     return render_template('jqueryui.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
     
 @app.route("/sequences.json")
