@@ -28,6 +28,11 @@ This is designed to run on a Raspberry Pi with PixelStrip / NeoPixels / WS2812B 
 For more details see:
 <http://www.penguintutor.com/projects/pixelstrip>
 
+
+To install the pre-requisite library first install the RPI ws281x library:
+
+    sudo pip3 install rpi_ws281x
+
 It is recommended to install directly from git, which will allow for install of future updates. Note that updates will replace any custom sequences you have created.
 
 On a Raspberry Pi, open a terminal and enter the following commands:
