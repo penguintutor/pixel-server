@@ -1,10 +1,12 @@
-pixe# pixel-server
+# pixel-server
 Wireless control of PixelStrips or NeoPixels using a web graphical interface running on a Raspberry Pi.
 
 Works with any Raspberry Pi. 
 
 For more details see:
-<http://www.penguintutor.com/projects/pixelstrip>
+<http://www.penguintutor.com/projects/pixel-server>
+
+![NeoPixel web application](http://www.penguintutor.com/projects/images/pixelserver-webapplication.png)
 
 ## Colors
 
@@ -49,6 +51,6 @@ For more information see: <http://www.penguintutor.com/raspberrypi/startup>
 
 You can automate the light sequences being turned on and off by using crontab. For example:
 
-0 22 `* * *` wget -O /dev/null http://127.0.0.1/set?seq=alloff&delay=976&reverse=0&colors=ffffff
-0 16 `* *` 1-5 wget -O /dev/null http://127.0.0.1/set?seq=chaser&delay=5000&reverse=1&colors=ffffff,ffffff,ffffff,0000ff,ffffff,ffffff,ffffff,00ffff
+    0 22 \* \* \* wget -O /dev/null http://127.0.0.1/set?seq=alloff&delay=976&reverse=0&colors=ffffff
+    0 16 \* \* 1-5 wget -O /dev/null http://127.0.0.1/set?seq=chaser&delay=5000&reverse=1&colors=ffffff,ffffff,ffffff,0000ff,ffffff,ffffff,ffffff,00ffff
 
