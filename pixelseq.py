@@ -58,7 +58,24 @@ class SeqList():
              "title": "Chaser Fill End",
              "description" : "Single LED chaser to end and then fill up",
              "group" : 1
+             },
+             {"seq_name" : "colorWipeOn",
+              "title" : "Color Wipe On",
+              "description": "Color wipe turning LEDs on",
+              "group" : 2
+             },
+             {"seq_name" : "colorWipeOff",
+              "title" : "Color Wipe Off",
+              "description": "Color wipe turning LEDs off",
+              "group" : 2
+             },
+             {"seq_name" : "colorWipeOnOff",
+              "title" : "Color Wipe On Off",
+              "description": "Color wipe turning LEDs on, then off again",
+              "group" : 2
              }
+         
+             
             ]
         # default colors (can use any color, but these are default for chooing from)
         # used by random
@@ -153,7 +170,10 @@ class PixelSeq():
             'chaser' : self.chaser,
             'chaserchangecolor' : self.chaserChangeColor,
             'chaserbackground' : self.chaserBackground,
-            'chaserfillend' : self.chaserFillEnd
+            'chaserfillend' : self.chaserFillEnd,
+            'colorWipeOn' : self.colorWipeOn,
+            'colorWipeOff' : self.colorWipeOff,
+            'colorWipeOnOff' : self.colorWipeOnOff
             }
         
         self.strip = PixelStrip (
@@ -345,7 +365,69 @@ class PixelSeq():
         else :
             return seq_position + 1
             
-    # from first pixel to last add LeD at a time then stay lit
+    # from first pixel to last add LED at a time until full then reset
+    def colorWipeOn(self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        color_pos = 0
+        for i in range (0, num_pixels):
+            if (reverse == False):
+                if (i <= seq_position):
+                    self.strip.setPixelColor(i, colors[color_pos])
+                else:
+                    self.strip.setPixelColor(i, Color(0,0,0))
+            else:       # Reverse must be True
+                if (i <= seq_position) :
+                    self.strip.setPixelColor(num_pixels - i -1, colors[color_pos])
+                else:
+                    self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+            # Always increment positive (as fill from other end)
+            color_pos = self._color_inc (color_pos, len(colors), False)
+        self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 1
+        # If reached end then just return
+        if seq_position >= num_pixels:
+            return 0
+        return seq_position
+        
+    # from all on remove LED one at a time until all off then reset
+    def colorWipeOff(self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        color_pos = 0
+        for i in range (0, num_pixels):
+            if (reverse == False):
+                if (i > num_pixels - seq_position -1):
+                    self.strip.setPixelColor(i, Color(0,0,0))
+                else:
+                    self.strip.setPixelColor(i, colors[color_pos])
+            else:       # Reverse must be True
+                if (i > num_pixels - seq_position -1) :
+                    self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+                else:
+                    self.strip.setPixelColor(num_pixels - i -1, colors[color_pos])
+                    
+            # Always increment positive (as fill from other end)
+            color_pos = self._color_inc (color_pos, len(colors), False)
+        self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 1
+        # If reached end then just return
+        if seq_position > num_pixels:
+            return 0
+        return seq_position
+        
+    # Turn all on one at a time, then all off again
+    def colorWipeOnOff (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        # has it's own seq position which goes to 2 x normal seq position
+        if (seq_position < num_pixels):
+            self.colorWipeOn (seq_position, reverse, colors)
+        else:
+            self.colorWipeOff (seq_position - num_pixels, reverse, colors)
+        seq_position += 1
+        if (seq_position > (num_pixels * 2)):
+            seq_position = 0
+        return seq_position
             
     # choose a sequence at random
     # change when each reaches 0
