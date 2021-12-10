@@ -73,8 +73,32 @@ class SeqList():
               "title" : "Color Wipe On Off",
               "description": "Color wipe turning LEDs on, then off again",
               "group" : 2
+             },
+             {"seq_name" : "colorWipeInOn",
+              "title" : "Color Wipe In On",
+              "description": "Color wipe from outwards going inwards",
+              "group" : 2
+             },
+             {"seq_name" : "colorWipeOutOff",
+              "title" : "Color Wipe Out Off",
+              "description": "Color wipe from inwards going outwards turning off",
+              "group" : 2
+             },
+             {"seq_name" : "colorWipeOutOn",
+              "title" : "Color Wipe Out On",
+              "description": "Color wipe from inwards going outwards",
+              "group" : 2
+             },
+             {"seq_name" : "colorWipeInOff",
+              "title" : "Color Wipe In Off",
+              "description": "Color wipe from outwards going inwards turning off",
+              "group" : 2
+             },
+             {"seq_name" : "colorWipeInOut",
+              "title" : "Color Wipe In Out",
+              "description": "Color wipe from outwards going inwards and back again",
+              "group" : 2
              }
-         
              
             ]
         # default colors (can use any color, but these are default for chooing from)
@@ -173,7 +197,12 @@ class PixelSeq():
             'chaserfillend' : self.chaserFillEnd,
             'colorWipeOn' : self.colorWipeOn,
             'colorWipeOff' : self.colorWipeOff,
-            'colorWipeOnOff' : self.colorWipeOnOff
+            'colorWipeOnOff' : self.colorWipeOnOff,
+            'colorWipeInOn' : self.colorWipeInOn,
+            'colorWipeOutOff' : self.colorWipeOutOff,
+            'colorWipeOutOn' : self.colorWipeOutOn,
+            'colorWipeInOff' : self.colorWipeInOff,
+            'colorWipeInOut' : self.colorWipeInOut
             }
         
         self.strip = PixelStrip (
@@ -428,6 +457,203 @@ class PixelSeq():
         if (seq_position > (num_pixels * 2)):
             seq_position = 0
         return seq_position
+        
+        
+    # From outside going inwards (both ends)
+    # Color applies equally from both ends
+    # Goes from 0 (none on) until
+    # seq_position = (num_pixels/2)+1 If odd
+    # seq_position = (num_pixels/2)+2 If even
+    def colorWipeInOn (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        # index of last pixel
+        pixel_last_pair = math.floor(num_pixels/2) # If odd number of pixels then we have one more after this value
+        color_pos = 0
+        
+        if (reverse):
+            color_pos = math.floor((num_pixels/2) % len(colors))
+            # if even subtract 1
+            if (num_pixels % 2 == 0):
+                color_pos -= 1
+            if (color_pos < 0):
+                color_pos = num_colors -1
+    
+        for i in range (0, pixel_last_pair):
+            if (i < seq_position-1):
+                self.strip.setPixelColor(i, colors[color_pos])
+                self.strip.setPixelColor(num_pixels - i -1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(i, Color(0,0,0))
+                self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+                
+            color_pos = self._color_inc (color_pos, len(colors), reverse)
+        # if odd number of pixels then 1 more 
+        if (num_pixels %2 == 1):
+            if (pixel_last_pair+1 < seq_position-1):
+                self.strip.setPixelColor(pixel_last_pair+1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(pixel_last_pair+1, Color(0,0,0))
+        self.strip.show()
+        # increment position
+        seq_position += 1
+        if (num_pixels %2 == 0 and seq_position > pixel_last_pair +1):
+            seq_position = 0
+        elif (num_pixels %2 == 1 and seq_position > pixel_last_pair +2):
+            seq_position = 0
+        return seq_position
+    
+
+    # From outside going inwards turning off (both ends)
+    # Color applies equally from both ends
+    # Goes from 0 (all on) until
+    # seq_position = (num_pixels/2)+1 If odd
+    # seq_position = (num_pixels/2)+2 If even
+    def colorWipeInOff(self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        # index of last pixel
+        pixel_last_pair = math.floor(num_pixels/2) # If odd number of pixels then we have one more after this value
+        color_pos = 0
+        
+        if (reverse):
+            color_pos = math.floor((num_pixels/2) % len(colors))
+            # if even subtract 1
+            if (num_pixels % 2 == 0):
+                color_pos -= 1
+            if (color_pos < 0):
+                color_pos = num_colors -1
+    
+        for i in range (0, pixel_last_pair):
+            if (i >= seq_position):
+                self.strip.setPixelColor(i, colors[color_pos])
+                self.strip.setPixelColor(num_pixels - i -1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(i, Color(0,0,0))
+                self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+                
+            color_pos = self._color_inc (color_pos, len(colors), reverse)
+        # if odd number of pixels then 1 more 
+        if (num_pixels %2 == 1):
+            if (pixel_last_pair+1 < seq_position-1):
+                self.strip.setPixelColor(pixel_last_pair+1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(pixel_last_pair+1, Color(0,0,0))
+        self.strip.show()
+        # increment position
+        seq_position += 1
+        if (num_pixels %2 == 0 and seq_position > pixel_last_pair +1):
+            seq_position = 0
+        elif (num_pixels %2 == 1 and seq_position > pixel_last_pair +2):
+            seq_position = 0
+        return seq_position
+    
+
+
+
+        
+    # From inside going outwards (both ends)
+    # Color applies equally from both ends
+    # Goes from 0 (none on) until
+    # seq_position = (num_pixels/2)+1 If odd
+    # seq_position = (num_pixels/2)+2 If even
+    def colorWipeOutOn (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        # index of last pixel
+        pixel_last_pair = math.floor(num_pixels/2) # If odd number of pixels then we have one more after this value
+        color_pos = 0
+        
+        if (reverse):
+            color_pos = math.floor((num_pixels/2) % len(colors))
+            # if even subtract 1
+            if (num_pixels % 2 == 0):
+                color_pos -= 1
+            if (color_pos < 0):
+                color_pos = num_colors -1
+    
+        for i in range (0, pixel_last_pair):
+            if (i >= pixel_last_pair - seq_position +1):
+                self.strip.setPixelColor(i, colors[color_pos])
+                self.strip.setPixelColor(num_pixels - i -1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(i, Color(0,0,0))
+                self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+                
+            color_pos = self._color_inc (color_pos, len(colors), reverse)
+        # if odd number of pixels then 1 more 
+        if (num_pixels %2 == 1):
+            if (pixel_last_pair+1 < seq_position+1):
+                self.strip.setPixelColor(pixel_last_pair+1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(pixel_last_pair+1, Color(0,0,0))
+        self.strip.show()
+        # increment position
+        seq_position += 1
+        if (num_pixels %2 == 0 and seq_position > pixel_last_pair +1):
+            seq_position = 0
+        elif (num_pixels %2 == 1 and seq_position > pixel_last_pair +2):
+            seq_position = 0
+        return seq_position
+    
+    
+    
+        
+    # From inside going outwards (both ends)
+    # Color applies equally from both ends
+    # Goes from 0 (none on) until
+    # seq_position = (num_pixels/2)+1 If odd
+    # seq_position = (num_pixels/2)+2 If even
+    def colorWipeOutOff (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        # index of last pixel
+        pixel_last_pair = math.floor(num_pixels/2) # If odd number of pixels then we have one more after this value
+        color_pos = 0
+        
+        if (reverse):
+            color_pos = math.floor((num_pixels/2) % len(colors))
+            # if even subtract 1
+            if (num_pixels % 2 == 0):
+                color_pos -= 1
+            if (color_pos < 0):
+                color_pos = num_colors -1
+    
+        for i in range (0, pixel_last_pair):
+            if (i <= pixel_last_pair - seq_position +1):
+                self.strip.setPixelColor(i, colors[color_pos])
+                self.strip.setPixelColor(num_pixels - i -1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(i, Color(0,0,0))
+                self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+                
+            color_pos = self._color_inc (color_pos, len(colors), reverse)
+        # if odd number of pixels then 1 more 
+        if (num_pixels %2 == 1):
+            if (pixel_last_pair+1 < seq_position+1):
+                self.strip.setPixelColor(pixel_last_pair+1, colors[color_pos])
+            else:
+                self.strip.setPixelColor(pixel_last_pair+1, Color(0,0,0))
+        self.strip.show()
+        # increment position
+        seq_position += 1
+        if (num_pixels %2 == 0 and seq_position > pixel_last_pair +1):
+            seq_position = 0
+        elif (num_pixels %2 == 1 and seq_position > pixel_last_pair +2):
+            seq_position = 0
+        return seq_position
+    
+    # Wipe in then out again
+    def colorWipeInOut (self, seq_position, reverse, colors):
+        num_pixels_seq = math.floor(self.strip.numPixels() / 2)
+        # has it's own seq position which goes to 2 x normal seq position
+        if (seq_position <= num_pixels_seq):
+            self.colorWipeInOn (seq_position, reverse, colors)
+        else:
+            self.colorWipeOutOff (seq_position - num_pixels_seq, reverse, colors)
+        seq_position += 1
+        if (seq_position > (num_pixels_seq * 2)+1):
+            seq_position = 0
+        return seq_position
+        
+
+            
             
     # choose a sequence at random
     # change when each reaches 0
