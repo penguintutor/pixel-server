@@ -102,10 +102,14 @@ class SeqList():
              },
              {"seq_name" : "rainbow",
               "title" : "Rainbow",
-              "description": "Color changing all colors",
+              "description": "Color changing all colors (gradual)",
+              "group" : 3
+             },
+             {"seq_name" : "rainbowCycle",
+              "title" : "Rainbow Cycle",
+              "description": "Color changing all colors ",
               "group" : 3
              }
-             
             ]
         # default colors (can use any color, but these are default for chooing from)
         # used by random
@@ -209,7 +213,8 @@ class PixelSeq():
             'colorWipeOutOn' : self.colorWipeOutOn,
             'colorWipeInOff' : self.colorWipeInOff,
             'colorWipeInOut' : self.colorWipeInOut,
-            'rainbow' : self.rainbow
+            'rainbow' : self.rainbow,
+            'rainbowCycle' : self.rainbowCycle
             }
         
         self.strip = PixelStrip (
@@ -665,6 +670,26 @@ class PixelSeq():
         
         for i in range (0, num_pixels):
             if (i <= seq_position):
+                hue_value = ((num_pixels * 100) - seq_position + i) / (num_pixels * 100)
+            else:
+                hue_value = (i - seq_position) / (num_pixels * 100)
+            if (not reverse):
+                self.strip.setPixelColor(i, Color(*self._rainbow_color(hue_value)))
+            else:
+                self.strip.setPixelColor(num_pixels - i -1, Color(*self._rainbow_color(hue_value)))
+        self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 100
+        # max seq_position is how long sequence lasts
+        if seq_position > (num_pixels * 100):
+            seq_position = 0
+        return seq_position            
+            
+    def rainbowCycle (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        
+        for i in range (0, num_pixels):
+            if (i <= seq_position):
                 hue_value = (num_pixels - seq_position + i) / num_pixels
             else:
                 hue_value = (i - seq_position) / num_pixels
@@ -679,21 +704,6 @@ class PixelSeq():
         if seq_position > num_pixels:
             seq_position = 0
         return seq_position            
-        
-        
-        
-        
-    # converts a hue value to a rgb color value
-    # give a value 0 to 1
-    def _rainbow_color(self, hue_value):
-        rgb_floats = hsv_to_rgb(hue_value, 1, 0.3)
-        return (
-            round(rgb_floats[0] * 255),
-            round(rgb_floats[1] * 255),
-            round(rgb_floats[2] * 255)
-            )
-        
-            
             
             
     # choose a sequence at random
@@ -746,5 +756,19 @@ class PixelSeq():
             if (current_color < 0):
                 current_color = num_colors -1
         return current_color
+        
+        
+            
+    # converts a hue value to a rgb color value
+    # give a hue_value 0 to 1
+    def _rainbow_color(self, hue_value):
+        rgb_floats = hsv_to_rgb(hue_value, 1, 0.3)
+        return (
+            round(rgb_floats[0] * 255),
+            round(rgb_floats[1] * 255),
+            round(rgb_floats[2] * 255)
+            )
+        
+            
         
         
