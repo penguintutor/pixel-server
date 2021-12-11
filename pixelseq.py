@@ -5,6 +5,7 @@ from flask import json
 import re
 import math
 import random
+from colorsys import hsv_to_rgb
 
 
 # Defines the sequences available for pixelserver
@@ -98,6 +99,11 @@ class SeqList():
               "title" : "Color Wipe In Out",
               "description": "Color wipe from outwards going inwards and back again",
               "group" : 2
+             },
+             {"seq_name" : "rainbow",
+              "title" : "Rainbow",
+              "description": "Color changing all colors",
+              "group" : 3
              }
              
             ]
@@ -202,7 +208,8 @@ class PixelSeq():
             'colorWipeOutOff' : self.colorWipeOutOff,
             'colorWipeOutOn' : self.colorWipeOutOn,
             'colorWipeInOff' : self.colorWipeInOff,
-            'colorWipeInOut' : self.colorWipeInOut
+            'colorWipeInOut' : self.colorWipeInOut,
+            'rainbow' : self.rainbow
             }
         
         self.strip = PixelStrip (
@@ -652,7 +659,41 @@ class PixelSeq():
             seq_position = 0
         return seq_position
         
-
+            
+    def rainbow (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        
+        for i in range (0, num_pixels):
+            if (i <= seq_position):
+                hue_value = (num_pixels - seq_position + i) / num_pixels
+            else:
+                hue_value = (i - seq_position) / num_pixels
+            if (not reverse):
+                self.strip.setPixelColor(i, Color(*self._rainbow_color(hue_value)))
+            else:
+                self.strip.setPixelColor(num_pixels - i -1, Color(*self._rainbow_color(hue_value)))
+        self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 1
+        # max seq_position is how long sequence lasts
+        if seq_position > num_pixels:
+            seq_position = 0
+        return seq_position            
+        
+        
+        
+        
+    # converts a hue value to a rgb color value
+    # give a value 0 to 1
+    def _rainbow_color(self, hue_value):
+        rgb_floats = hsv_to_rgb(hue_value, 1, 0.3)
+        return (
+            round(rgb_floats[0] * 255),
+            round(rgb_floats[1] * 255),
+            round(rgb_floats[2] * 255)
+            )
+        
+            
             
             
     # choose a sequence at random
