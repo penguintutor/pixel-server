@@ -107,7 +107,12 @@ class SeqList():
              },
              {"seq_name" : "rainbowCycle",
               "title" : "Rainbow Cycle",
-              "description": "Color changing all colors ",
+              "description": "Color changing all colors",
+              "group" : 3
+             },
+             {"seq_name" : "rainbowTheatre",
+              "title" : "Rainbow Theatre",
+              "description": "Color changing theatre chase",
               "group" : 3
              }
             ]
@@ -214,7 +219,8 @@ class PixelSeq():
             'colorWipeInOff' : self.colorWipeInOff,
             'colorWipeInOut' : self.colorWipeInOut,
             'rainbow' : self.rainbow,
-            'rainbowCycle' : self.rainbowCycle
+            'rainbowCycle' : self.rainbowCycle,
+            'rainbowTheatre' : self.rainbowTheatre
             }
         
         self.strip = PixelStrip (
@@ -704,7 +710,44 @@ class PixelSeq():
         if seq_position > num_pixels:
             seq_position = 0
         return seq_position            
+
             
+    # Rainbow colour changing with chase
+    # Uses number of colors to determine chase length,
+    # but not actual colors - just 1 blank after number of colors
+    def rainbowTheatre (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        num_colors = len(colors)+1
+        
+        blank_seq_pos = seq_position % 100 
+        
+        for i in range (0, num_pixels):
+            if (i <= seq_position):
+                hue_value = ((num_pixels * 100) - seq_position + i) / (num_pixels * 100)
+            else:
+                hue_value = (i - seq_position) / (num_pixels * 100)
+            if (not reverse):
+                # if more than colors set to black
+                if (i % num_colors == blank_seq_pos):
+                    self.strip.setPixelColor(i, Color(0,0,0))
+                else:
+                    self.strip.setPixelColor(i, Color(*self._rainbow_color(hue_value)))
+            else:
+                if (i % num_colors == blank_seq_pos):
+                    self.strip.setPixelColor(num_pixels - i -1, Color(0,0,0))
+                else:
+                    self.strip.setPixelColor(num_pixels - i -1, Color(*self._rainbow_color(hue_value)))
+        self.strip.show()
+        # If displayed a blank jump to next 100
+        if (seq_position % 100 >= num_colors - 1):
+            seq_position += (100-num_colors+1)
+        else:
+            seq_position += 1
+        # max seq_position is how long sequence lasts
+        if seq_position > (num_pixels * 100):
+            seq_position = 0
+        return seq_position  
+
             
     # choose a sequence at random
     # change when each reaches 0
