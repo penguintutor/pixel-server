@@ -102,12 +102,12 @@ class SeqList():
              },
              {"seq_name" : "rainbow",
               "title" : "Rainbow",
-              "description": "Color changing all colors (gradual)",
+              "description": "Color changing all colors",
               "group" : 3
              },
              {"seq_name" : "rainbowCycle",
               "title" : "Rainbow Cycle",
-              "description": "Color changing all colors",
+              "description": "Color changing all colors (gradually)",
               "group" : 3
              },
              {"seq_name" : "rainbowTheatre",
@@ -670,8 +670,30 @@ class PixelSeq():
             seq_position = 0
         return seq_position
         
-            
+    # Display rainbow (colour wheel) across LEDs and cycle through quickly    
     def rainbow (self, seq_position, reverse, colors):
+        num_pixels = self.strip.numPixels()
+        
+        for i in range (0, num_pixels):
+            if (i <= seq_position):
+                hue_value = (num_pixels - seq_position + i) / num_pixels
+            else:
+                hue_value = (i - seq_position) / num_pixels
+            if (not reverse):
+                self.strip.setPixelColor(i, Color(*self._rainbow_color(hue_value)))
+            else:
+                self.strip.setPixelColor(num_pixels - i -1, Color(*self._rainbow_color(hue_value)))
+        self.strip.show()
+        # increment seq_position (used to detect full seq complete)
+        seq_position += 1
+        # max seq_position is how long sequence lasts
+        if seq_position > num_pixels:
+            seq_position = 0
+        return seq_position   
+      
+    # Cycle through rainbow (colour wheel) slowly. 
+    # Gradually changing all LEDs  
+    def rainbowCycle (self, seq_position, reverse, colors):
         num_pixels = self.strip.numPixels()
         
         for i in range (0, num_pixels):
@@ -691,25 +713,7 @@ class PixelSeq():
             seq_position = 0
         return seq_position            
             
-    def rainbowCycle (self, seq_position, reverse, colors):
-        num_pixels = self.strip.numPixels()
-        
-        for i in range (0, num_pixels):
-            if (i <= seq_position):
-                hue_value = (num_pixels - seq_position + i) / num_pixels
-            else:
-                hue_value = (i - seq_position) / num_pixels
-            if (not reverse):
-                self.strip.setPixelColor(i, Color(*self._rainbow_color(hue_value)))
-            else:
-                self.strip.setPixelColor(num_pixels - i -1, Color(*self._rainbow_color(hue_value)))
-        self.strip.show()
-        # increment seq_position (used to detect full seq complete)
-        seq_position += 1
-        # max seq_position is how long sequence lasts
-        if seq_position > num_pixels:
-            seq_position = 0
-        return seq_position            
+         
 
             
     # Rainbow colour changing with chase
