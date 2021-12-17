@@ -58,4 +58,27 @@ You can automate the light sequences being turned on and off by using crontab. F
 
     0 22 * * * wget -O /dev/null http://127.0.0.1/set?seq=alloff&delay=976&reverse=0&colors=ffffff
     0 16 * * 1-5 wget -O /dev/null http://127.0.0.1/set?seq=chaser&delay=5000&reverse=1&colors=ffffff,ffffff,ffffff,0000ff,ffffff,ffffff,ffffff,00ffff
+    
+# Configuration
+
+The default configuration is in a file called **defaults.cfg**. You should not edit that file directly as it will be overwritten by future upgrades. Instead copy the relevant entries to a new file called **pixelserver.cfg**.
+
+The following parameters can be used:
+
+* ledcount - Number of LEDs on your pixel strip
+* gpiopin - GPIO pin number
+* ledfreq - LED frequency (normally leave at default)
+* leddma - LED DMA number (normally leave at default)
+* ledchannel - LED channel number (normally leave at default)
+* ledmaxbrighness - LED brightness (0 to 255)
+* ledinvert - Set to True if an inverting buffer is used (otherwise False)
+
+    
+# Upgrading to the latest version
+
+If you installed the software using a _git clone_ then you can update by issuing a `git pull`. Alternatively you can download the latest version overwriting your existing files manually.
+
+As long as you followed the instructions regarding using a custom configuration file, then your config will still be kept.
+
+
 
