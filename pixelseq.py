@@ -230,7 +230,8 @@ class PixelSeq():
             pixel_config.leddma,
             pixel_config.ledinvert,
             pixel_config.ledmaxbrightness,
-            pixel_config.ledchannel
+            pixel_config.ledchannel,
+            pixel_config.striptype
             )
         self.strip.begin()
         # During startup turn all LEDs off

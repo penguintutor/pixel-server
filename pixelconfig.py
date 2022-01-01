@@ -1,5 +1,15 @@
+from rpi_ws281x import *
 class PixelConfig():
     
+    # Dictionary of types
+    strip_types = {
+        'WS2811_STRIP_RGB' : ws.WS2811_STRIP_RGB,
+        'WS2811_STRIP_RBG' : ws.WS2811_STRIP_RBG,
+        'WS2811_STRIP_GRB' : ws.WS2811_STRIP_GRB,
+        'WS2811_STRIP_BGR' : ws.WS2811_STRIP_BGR,
+        'WS2811_STRIP_BRG' : ws.WS2811_STRIP_BRG,
+        'WS2811_STRIP_BGR' : ws.WS2811_STRIP_BGR
+    }
     
     def __init__ (self):
         # default config file name (if not exist then uses default)
@@ -7,7 +17,9 @@ class PixelConfig():
         self.customcfg = "pixelserver.cfg"
         self.errormsg = ""
 
-        '''        
+        ''' 
+        Example defaults
+        
         self.default_led_settings = {
         'ledcount': 44,
         'gpiopin': 18,
@@ -15,16 +27,9 @@ class PixelConfig():
         'leddma' : 5,
         'ledmaxbrightness': 50,
         'ledinvert': False,
-        'ledchannel': 0           #       
-        }
-        # Set to defaults then override with config file
-        self.ledcount = self.default_led_settings['ledcount']
-        self.gpiopin = 21
-        self.ledfreq = self.default_led_settings['ledfreq']
-        self.leddma = self.default_led_settings['leddma']
-        self.ledmaxbrightness = self.default_led_settings['ledmaxbrightness']
-        self.ledinvert = self.default_led_settings['ledinvert']
-        self.ledchannel = self.default_led_settings['ledchannel'] '''
+        'ledchannel': 0,
+        'striptype': ws.WS2811_STRIP_GRB
+        '''
 
         if (self.load_config (self.defaultcfg) != 1):
             print ("Error loading config: "+self.errormsg)
@@ -111,6 +116,9 @@ class PixelConfig():
                         else :
                             self.errormsg = "Invalid ledchannel value "+value
                             return -2
+                    elif (key == "striptype"):
+                        if (value in PixelConfig.strip_types):
+                            self.striptype = PixelConfig.strip_types[value]
                     else:
                         self.errormsg = "Unknown entry "+key+" in "+filename
                         return -2
