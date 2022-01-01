@@ -72,6 +72,29 @@ The following parameters can be used:
 * ledchannel - LED channel number (normally leave at default)
 * ledmaxbrighness - LED brightness (0 to 255)
 * ledinvert - Set to True if an inverting buffer is used (otherwise False)
+* striptype - Set to colour sequence or strip type
+
+## Valid strip types
+The striptype can be set using a color sequence. For WS2811 / WS2812B strips then this should be three letters representing the order of the RGB colours eg. _GRB_ for green, red then blue.
+
+For SK6812 strips then it should be four leteers also including W for white. eg. _GRBW_ for green, red, blue and then white.
+
+Alternatively the strip type can be defined as one of the following values:  
+WS2811_STRIP_RGB  
+WS2811_STRIP_RBG  
+WS2811_STRIP_GRB  
+WS2811_STRIP_BGR  
+WS2811_STRIP_BRG  
+WS2811_STRIP_BGR  
+WS2812_STRIP  
+SK6812_STRIP_RGBW  
+SK6812_STRIP_RBGW  
+SK6812_STRIP_GRBW  
+SK6812_STRIP_GBRW  
+SK6812_STRIP_BRGW  
+SK6812_STRIP_BGRW  
+SK6812_STRIP  
+SK6812W_STRIP  
 
     
 # Upgrading to the latest version

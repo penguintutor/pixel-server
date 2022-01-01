@@ -2,13 +2,25 @@ from rpi_ws281x import *
 class PixelConfig():
     
     # Dictionary of types
+    # Based on ws281x library - these are the most common ones
+    # Note that WS2812 works same as WS2812
     strip_types = {
         'WS2811_STRIP_RGB' : ws.WS2811_STRIP_RGB,
         'WS2811_STRIP_RBG' : ws.WS2811_STRIP_RBG,
         'WS2811_STRIP_GRB' : ws.WS2811_STRIP_GRB,
         'WS2811_STRIP_BGR' : ws.WS2811_STRIP_BGR,
         'WS2811_STRIP_BRG' : ws.WS2811_STRIP_BRG,
-        'WS2811_STRIP_BGR' : ws.WS2811_STRIP_BGR
+        'WS2811_STRIP_BGR' : ws.WS2811_STRIP_BGR,
+        'WS2812_STRIP' : ws.WS2812_STRIP,
+        'SK6812_STRIP_RGBW' : ws.SK6812_STRIP_RGBW,
+        'SK6812_STRIP_RBGW' : ws.SK6812_STRIP_RBGW,
+        'SK6812_STRIP_GRBW' : ws.SK6812_STRIP_GRBW,
+        'SK6812_STRIP_GBRW' : ws.SK6812_STRIP_GBRW,
+        'SK6812_STRIP_BRGW' : ws.SK6812_STRIP_BRGW,
+        'SK6812_STRIP_BGRW' : ws.SK6812_STRIP_BGRW,
+        'SK6812_STRIP' : ws.SK6812_STRIP,
+        'SK6812W_STRIP' : ws.SK6812W_STRIP
+        
     }
     
     def __init__ (self):
@@ -117,8 +129,23 @@ class PixelConfig():
                             self.errormsg = "Invalid ledchannel value "+value
                             return -2
                     elif (key == "striptype"):
-                        if (value in PixelConfig.strip_types):
-                            self.striptype = PixelConfig.strip_types[value]
+                        # Allows abbreviated version (eg. RGB = WS2811_STRIP_RGB)
+                        # or long version
+                        # If it's short 3 chars add WS2811
+                        # If it's short 4 chars add SK6812
+                        # first remove any whitespace
+                        value = value.strip()
+                        if (len(value) == 3):
+                            strip_value = "WS2811_STRIP_"+value
+                        elif (len(value) == 4):
+                            strip_value = "SK6812_STRIP_"+value
+                        else:
+                            strip_value = value
+                        if strip_value in PixelConfig.strip_types:
+                            self.striptype = PixelConfig.strip_types[strip_value]
+                        else:
+                            self.errormsg = "Invalid striptype value "+value
+                            return -2
                     else:
                         self.errormsg = "Unknown entry "+key+" in "+filename
                         return -2
