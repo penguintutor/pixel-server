@@ -29,19 +29,27 @@ For more details see:
 <http://www.penguintutor.com/projects/pixelstrip>
 
 
-To install the pre-requisite library first install the RPI ws281x library:
+To install the Flask web environment run
+
+    sudo apt install python3-flask
+
+
+To install the RPI ws281x library:
 
     sudo pip3 install rpi_ws281x
 
-It is recommended to install directly from git, which will allow for install of future updates. Note that updates will replace any custom sequences you have created.
+It is recommended to install this program directly from git, which will allow for install of future updates. Note that updates will replace any custom sequences you have created. To provide support for different usernames I recommend installing into the /opt directory.
 
 On a Raspberry Pi, open a terminal and enter the following commands:
 
-    git clone https://github.com/penguintutor/pixel-server.git 
+    cd /opt
+    sudo mkdir pixel-server
+    sudo chown $USER: pixel-server 
+    git clone https://github.com/penguintutor/pixel-server.git pixel-server
 
 Then to have it start automatically run the following:
 
-    sudo cp /home/pi/pixel-server/pixelserver.service /etc/systemd/system/
+    sudo cp /opt/pixel-server/pixelserver.service /etc/systemd/system/
     sudo chown root:root /etc/systemd/system/pixelserver.service
     sudo chmod 644 /etc/systemd/system/pixelserver.service
 

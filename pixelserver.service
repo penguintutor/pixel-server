@@ -3,8 +3,8 @@ Description=Wireless pixelstrip server
 After=sshd.service
 
 [Service]
-WorkingDirectory=/home/pi/pixel-server
-ExecStart=/home/pi/pixel-server/pixelserver.py
+WorkingDirectory=/opt/pixel-server
+ExecStart=/opt/pixel-server/pixelserver.py
 Restart=always
 User=root
 
