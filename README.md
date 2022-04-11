@@ -29,11 +29,6 @@ For more details see:
 <http://www.penguintutor.com/projects/pixelstrip>
 
 
-To install the Flask web environment run
-
-    sudo apt install python3-flask
-
-
 To install the RPI ws281x library:
 
     sudo pip3 install rpi_ws281x
