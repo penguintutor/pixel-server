@@ -53,7 +53,7 @@ Enable using:
     sudo systemctl start pixelserver.service
     sudo systemctl enable pixelserver.service
 
-There is also a video providing a step-by-step guide to installing this on a Raspberry Pi. [Installing Pixel Server on Raspberry Pi OS 64-bit]("https://youtu.be/D1VsBHWuY_I")
+There is also a video providing a step-by-step guide to installing this on a Raspberry Pi. [Installing Pixel Server on Raspberry Pi OS 64-bit](https://youtu.be/D1VsBHWuY_I)
 
 For more information see: [Penguin Tutor guide to starting programs automatically on a Raspberry Pi](http://www.penguintutor.com/raspberrypi/startup)
 
