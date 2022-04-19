@@ -82,7 +82,7 @@ The following parameters can be used:
 ## Valid strip types
 The striptype can be set using a color sequence. For WS2811 / WS2812B strips then this should be three letters representing the order of the RGB colours eg. _GRB_ for green, red then blue.
 
-For SK6812 strips then it should be four leteers also including W for white. eg. _GRBW_ for green, red, blue and then white.
+For SK6812 strips then it should be four letters also including W for white. eg. _GRBW_ for green, red, blue and then white.
 
 Alternatively the strip type can be defined as one of the following values:  
 WS2811_STRIP_RGB  
