@@ -7,6 +7,7 @@ from rpi_ws281x import *
 import threading
 from pixelconfig import PixelConfig
 from pixelseq import PixelSeq, SeqList
+from statusmsg import StatusMsg
 
 # Globals for passing information between threads
 # needs default settings
@@ -49,9 +50,9 @@ def js():
 def jquery():
     return render_template('jquery.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
    
-@app.route("/jqueryui.min.js")
+@app.route("/jquery-ui.min.js")
 def jqueryui():
-    return render_template('jqueryui.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
+    return render_template('jquery-ui.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
     
 @app.route("/sequences.json")
 def seqJSON ():
@@ -60,18 +61,22 @@ def seqJSON ():
 @app.route("/set")
 def setSeq():
     global seq_set, upd_time, on_status
+    status = StatusMsg()
+    status.set_server_values(seq_set)
     new_values = {}
     # perform first stage validation on data sent
     this_arg = request.args.get('seq', default = 'alloff', type = str)
     if (seq_list.validate_sequence(this_arg) == True):
         new_values["sequence"] = this_arg
     else:
-        return "Invaild request"
+        status.set_status ("error", "Invalid request")
+        return status.get_message()
     this_arg = request.args.get('delay', default = 1000, type = int)
     if (this_arg >= 0 and this_arg <= 1000):
         new_values["delay"] = this_arg
     else:
-        return "Invalid delay"
+        status.set_status ("error", "Invalid delay")
+        return status.get_message()
     this_arg = request.args.get('reverse', default = '0', type = str)
     if (this_arg == "1"):
         new_values["reverse"] = True
@@ -81,10 +86,13 @@ def setSeq():
     if (seq_list.validate_color_string(this_arg)):
         new_values["colors"] = this_arg
     else:
-        return "Invalid colors"
+        status.set_status ("error", "Invalid colors")
+        return status.get_message()
     # If reach here then it was successful for copy temp dict to actual
     seq_set = new_values
+    
     # Check for toggle status - if on and toggle=true then turn off
+    # this is done afer seq_set is copied - so override seq_set 
     this_arg = request.args.get('toggle', default = 'False', type = str)
     # only handle if toggle="True", otherwise ignore the parameter
     if (this_arg == "True" or this_arg == "true"):
@@ -95,10 +103,14 @@ def setSeq():
         else:
             # Action as normal, but set to true
             on_status = True
+            
+    # Update successful status
+    status.set_server_values(seq_set)
+    status.set_status ("success")
         
     # update time to notify other thread it's changed
     upd_time = time.time()
-    return "Ready"
+    return status.get_message ()
 
 def flaskThread():
     app.run(host='0.0.0.0', port=80)

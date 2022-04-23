@@ -3,9 +3,30 @@
 var sequence = "";
 var reverse = false;
 
+// Used for escaping strings as additional security check
+var entityMap = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+  '/': '&#x2F;',
+  '`': '&#x60;',
+  '=': '&#x3D;'
+};
+
+// Should not be required as data comes from our own server
+// but provides a little additional protection 
+function escapeHtml (string) {
+  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
+
 $(() => {
 
-    $('#status').html("<p>Status updated!</p>");
+    $('#status').html("<p>Ready</p>");
 
     $.getJSON( "sequences.json", {
         tagmode: "any",
@@ -96,11 +117,29 @@ function apply() {
     if (color_list == "") color_list = "ffffff";
     url_string = "/set?seq="+sequence+"&delay="+delay+"&reverse="+reverse_str+"&colors="+color_list;
     $.get( url_string, function (data) {
-        $("#status").html(data);
+        // Convert from json to user string
+        status_string = format_status (data);
+        $("#status").html(status_string);
     });
     
     
 }
+
+
+function format_status(data) {
+    obj = JSON.parse(data);
+    formatted_string = "";
+    if (obj.status =="success") {
+        // Displays the short sequence name, which is what would be used
+        // in automation etc.
+        formatted_string += "LEDs updated "+escapeHtml(obj.sequence);
+    }
+    else {
+        formatted_string += "Update failed "+escapeHtml(obj.msg);
+    }
+    return formatted_string;    
+}
+
 
 function show_speed() {
     // JQuery does not work well with manual slider
