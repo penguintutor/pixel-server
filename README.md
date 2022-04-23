@@ -63,6 +63,10 @@ You can automate the light sequences being turned on and off by using crontab. F
 
     0 22 * * * wget -O /dev/null http://127.0.0.1/set?seq=alloff&delay=976&reverse=0&colors=ffffff
     0 16 * * 1-5 wget -O /dev/null http://127.0.0.1/set?seq=chaser&delay=5000&reverse=1&colors=ffffff,ffffff,ffffff,0000ff,ffffff,ffffff,ffffff,00ffff
+
+## Toggle
+
+An additional setting availble for automation is &toggle=True. When turned on then the pixel output will toggle between the specified sequence and allOff.
     
 # Configuration
 
