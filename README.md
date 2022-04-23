@@ -105,6 +105,15 @@ SK6812_STRIP_BGRW
 SK6812_STRIP  
 SK6812W_STRIP  
 
+
+# Updates and changes
+
+This code is in development and may change in operation. Details of significant changes will be included here.
+
+# Change log
+## April 2022
+When setting a sequence the server will now respond with a JSON formatted status replacing the previous single word "ready" or simple error message. This provides feedback on the status of the request as well as what sequence is currently being displayed.
+
     
 # Upgrading to the latest version
 
