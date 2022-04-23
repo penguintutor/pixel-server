@@ -18,6 +18,9 @@ seq_set = {
     "colors" : "ffffff"
     }
 
+# used for toggle option
+# Ignored unless toggle=True parameter
+on_status = False
 
 # List of sequences
 seq_list = SeqList()
@@ -56,7 +59,7 @@ def seqJSON ():
     
 @app.route("/set")
 def setSeq():
-    global seq_set, upd_time
+    global seq_set, upd_time, on_status
     new_values = {}
     # perform first stage validation on data sent
     this_arg = request.args.get('seq', default = 'alloff', type = str)
@@ -81,6 +84,18 @@ def setSeq():
         return "Invalid colors"
     # If reach here then it was successful for copy temp dict to actual
     seq_set = new_values
+    # Check for toggle status - if on and toggle=true then turn off
+    this_arg = request.args.get('toggle', default = 'False', type = str)
+    # only handle if toggle="True", otherwise ignore the parameter
+    if (this_arg == "True" or this_arg == "true"):
+        if (on_status == True):
+            # Override request and replace with AllOff
+            seq_set["sequence"] = "alloff" 
+            on_status = False
+        else:
+            # Action as normal, but set to true
+            on_status = True
+        
     # update time to notify other thread it's changed
     upd_time = time.time()
     return "Ready"
