@@ -27,6 +27,7 @@ class PixelConfig():
         # default config file name (if not exist then uses default)
         self.defaultcfg = "defaults.cfg" 
         self.customcfg = "pixelserver.cfg"
+        self.customlightcfg = "customlight.cfg"
         self.errormsg = ""
 
         ''' 

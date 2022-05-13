@@ -8,6 +8,7 @@ import threading
 from pixelconfig import PixelConfig
 from pixelseq import PixelSeq, SeqList
 from statusmsg import StatusMsg
+from customlight import CustomLight
 
 # Globals for passing information between threads
 # needs default settings
@@ -118,18 +119,36 @@ def flaskThread():
 # Setup pixel strip and then start the updatePixels loop
 def mainThread():
     global seq_set, upd_time
+
+    
     last_update = upd_time
     current_sequence = ""
     pixel_conf = PixelConfig()
     pixels = PixelSeq(pixel_conf)
+    
+    # Use for custom color lights (eg CheerLights)
+    custom_light = CustomLight(pixel_conf.customlightcfg)
+    
     sequence_position = 0
     colors = [Color(255,255,255)]
 
     
     while(1):
+        # Check for change in custom light colors
+        # Reloads files if updated
+        if custom_light.is_updated():
+            upd_time = time.time()
+        
+        # If updated sequence / value etc.
         if (upd_time != last_update) :
+            # convert colors to list instead of comma string
+            color_list = seq_set['colors'].split(",")
+            # handle custom colors
+            color_list = custom_light.subs_custom_colors(color_list)   
             # Convert color string to list of colors (pre formatted for pixels)
-            colors = seq_list.string_to_colors(seq_set['colors'])
+            # Value returned as seq_colors is a list of Colors(), but may also include "custom" for any custom colors
+            colors = seq_list.string_to_colors(color_list)
+                     
             # If sequence changed then reset seq_position
             if (seq_set['sequence'] != current_sequence):
                 sequence_position = 0

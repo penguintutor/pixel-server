@@ -154,19 +154,19 @@ class SeqList():
     # Include some color handling methods 
     # Check for valid color string - simple pattern matching ONLY
     def validate_color_string (self, color_string):
-        pattern = r'[0-9a-f,]*'
+        # special case - custom is allowed - so included in validation
+        pattern = r'[0-9a-fustom,]*'
         result = re.fullmatch(pattern, color_string)
         if result:
             return True
         else:
             return False
     
-    def string_to_colors(self, color_string):
+    def string_to_colors(self, colors):
         # split based on , - assumes no # in string
         return_list = []
-        parts = color_string.split(",")
-        for this_part in parts:
-            rgb = self.hex_to_rgb("#"+this_part)
+        for this_color in colors:
+            rgb = self.hex_to_rgb("#"+this_color)
             return_list.append(Color(*rgb))
         return return_list
     

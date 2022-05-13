@@ -66,7 +66,16 @@ You can automate the light sequences being turned on and off by using crontab. F
 
 ## Toggle
 
-An additional setting availble for automation is &toggle=True. When turned on then the pixel output will toggle between the specified sequence and allOff.
+An additional setting available for automation is &toggle=True. When turned on then the pixel output will toggle between the specified sequence and allOff.
+
+## Cheerlights / Custom color
+
+New custom color option. You can create (or use an external program) a file called customlight.cfg. This file should contain a single color or list of colors (one color per line). They should be in html RRGGBB color format, with or without a #. 
+Any lines not recognised are ignored.
+
+To use in automation use the word "custom" in place of the RGB value in the URL string.
+
+For best effect use either a single color in the customlight.cfg file, or the same number of custom entries as the number of custom LEDs selected.
     
 # Configuration
 

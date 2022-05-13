@@ -129,7 +129,11 @@ ul ul ul { margin: 0;}
     height: 75px;
     text-align: center;
     padding: 20px;
-    border-color: black;
+    /*border-color: black;*/
+}
+
+.colcustom {
+    background-image: linear-gradient(to bottom right, red, yellow, green, blue);
 }
 
 .colwhite {
