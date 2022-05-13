@@ -76,6 +76,14 @@ Any lines not recognised are ignored.
 To use in automation use the word "custom" in place of the RGB value in the URL string.
 
 For best effect use either a single color in the customlight.cfg file, or the same number of custom entries as the number of custom LEDs selected.
+
+## Cheerlight automation
+
+If you would like to have the lights automatically update to the latest cheerlight color then you can add the following line to crontab.
+
+    */5 * * * * wget -O ~/pixel-server/customlight.cfg http://api.thingspeak.com/channels/1417/field/2/last.txt
+
+The ~ assumes that this is installed in your home directory.
     
 # Configuration
 
@@ -120,6 +128,11 @@ SK6812W_STRIP
 This code is in development and may change in operation. Details of significant changes will be included here.
 
 # Change log
+
+## May 2022
+Additional color option of "Custom Color". This allows custom colors to be used through a custom.light.cfg file. This is particularly useful if you want to be able to control color using cheerlights or would like to provide your own home automation with non-volitile color changes.
+
+
 ## April 2022
 When setting a sequence the server will now respond with a JSON formatted status replacing the previous single word "ready" or simple error message. This provides feedback on the status of the request as well as what sequence is currently being displayed.
 
