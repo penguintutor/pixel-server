@@ -57,6 +57,14 @@ There is also a video providing a step-by-step guide to installing this on a Ras
 
 For more information see: [Penguin Tutor guide to starting programs automatically on a Raspberry Pi](http://www.penguintutor.com/raspberrypi/startup)
 
+
+# Security
+
+New login features requires that users login to the web interface. This would prevent automation from working, therefore an alternative is allowed where clients can be pre-authorized based on their IP address. 
+
+If automation runs on the local machine then it is recommended that only the loopback IP address 127.0.0.1 is pre-authorized, but additional IP addresses can be enabled for use by WiFi switches, such as those used in the [ESP32 wireless capacitive touch switch](http://www.penguintutor.com/projects/esp32-captouch).
+
+
 # Automation
 
 You can automate the light sequences being turned on and off by using crontab. For example:
