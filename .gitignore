@@ -1,6 +1,10 @@
 # Don't copy config file
 pixelserver.cfg
 customlight.cfg
+auth.cfg
+users.cfg
+pixelserver.log
+
 
 
 # Byte-compiled / optimized / DLL files

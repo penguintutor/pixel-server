@@ -23,11 +23,11 @@ class PixelConfig():
         
     }
     
-    def __init__ (self):
+    def __init__ (self, default_config, custom_config, light_config):
         # default config file name (if not exist then uses default)
-        self.defaultcfg = "defaults.cfg" 
-        self.customcfg = "pixelserver.cfg"
-        self.customlightcfg = "customlight.cfg"
+        self.defaultcfg = default_config
+        self.customcfg = custom_config
+        self.customlightcfg = light_config
         self.errormsg = ""
 
         ''' 

@@ -3,12 +3,25 @@ import time
 from flask import Flask
 from flask import request
 from flask import render_template
+from flask import session
 from rpi_ws281x import *
 import threading
+import random
+import string
 from pixelconfig import PixelConfig
 from pixelseq import PixelSeq, SeqList
 from statusmsg import StatusMsg
 from customlight import CustomLight
+from serverauth import ServerAuth
+
+
+# Custom settings - filenames with further configs
+auth_config_filename = "auth.cfg"
+auth_users_filename = "users.cfg"
+log_filename = "pixelserver.log"        # currently used for authentication logging
+default_config_filename = "defaults.cfg" 
+custom_config_filename = "pixelserver.cfg"
+custom_light_config_filename = "customlight.cfg"
 
 # Globals for passing information between threads
 # needs default settings
@@ -31,18 +44,60 @@ app = Flask(
     __name__,
     template_folder="www"
     )
+# Create a secret_key to last whilst the program is running
+app.secret_key = ''.join(random.choice(string.ascii_letters) for i in range(15))
+
+auth = ServerAuth(auth_config_filename, auth_users_filename, log_filename)
+
+# check authentication using network and user
+# return "network", "logged_in", "login_required" or "invalid" (invalid = network rules prohibit)
+def auth_check ():
+    auth_type = auth.check_network(request.remote_addr)
+    # Also need to authenticate
+    if auth_type == "always":
+        return "network"
+    elif auth_type == "auth":
+        if 'username' in session:
+            return "logged_in"
+        # otherwise not authenticated
+        else: 
+            return "login_required"
+    return "invalid"
+
 
 @app.route("/")
 def main():
-    return render_template('index.html')
+    login_status = auth_check()
+    # not allowed even if logged in
+    if login_status == "invalid":
+        return render_template('invalid.html')
+    elif login_status == "network" or login_status == "logged_in":
+        return render_template('index.html')
+    else:   # login required
+        return render_template('login.html')
 
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if (auth.login_user(username, password) == True):
+            # create session
+            session['username'] = username
+            return render_template('index.html')
+    # Reach here then login was not successful
+    return render_template('login.html')
+    
+@app.route("/logout")
+def logout():
+    # Don't log logouts
+    session.pop('username', None)
+    return render_template('login.html')
 
 @app.route("/pixels.css")
 def css():
     return render_template('pixels.css'), 200, {'Content-Type': 'text/css; charset=utf-8'}
 
-    
-    
 @app.route("/pixels.js")
 def js():
     return render_template('pixels.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
@@ -55,6 +110,7 @@ def jquery():
 def jqueryui():
     return render_template('jquery-ui.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
     
+# provides list of sequences - don't authenticate
 @app.route("/sequences.json")
 def seqJSON ():
     return (seq_list.json())
@@ -118,12 +174,12 @@ def flaskThread():
     
 # Setup pixel strip and then start the updatePixels loop
 def mainThread():
-    global seq_set, upd_time
+    global seq_set, upd_time, pixel_conf
 
     
     last_update = upd_time
     current_sequence = ""
-    pixel_conf = PixelConfig()
+    pixel_conf = PixelConfig(default_config_filename, custom_config_filename, custom_light_config_filename)
     pixels = PixelSeq(pixel_conf)
     
     # Use for custom color lights (eg CheerLights)

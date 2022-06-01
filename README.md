@@ -60,6 +60,77 @@ For more information see: [Penguin Tutor guide to starting programs automaticall
 
 # Security
 
+## Enable SSL (HTTPS)
+
+This explains how you can use the Flask (development) server with https using Nginx as a reverse proxy. This uses a free security certificate from [Let's Encrypt](https://letsencrypt.org/). This means that I am able to setup Nginx as a reverse proxy on my home server, which could be used to provide encrypted connections to different services. 
+
+
+### On local pi with pixel-server
+Setup Flask to use gunicorn
+
+sudo apt update
+sudo apt ugprade
+
+sudo apt install python3-gunicorn
+
+Create a file /etc/systemd/system/gunicorn.service with the following:
+    [Unit]
+    Description=gunicorn daemon
+    After=network.target
+    
+    [Service]
+    User=www-data
+    Group=www-data
+    WorkingDirectory=/var/www/application/
+    
+    ExecStart=/usr/bin/gunicorn --access-logfile - --workers 3 --bind
+    unix:/var/www/application.sock wsgi:app
+    
+    [Install]
+    WantedBy=multi-user.target
+
+    
+
+    
+
+### On Nginx reverse proxy
+
+This does not have to be on the same server as pixel-server.
+
+First make sure your system is up-to-date
+
+sudo apt update
+sudo apt upgrade
+
+sudo apt install certbot
+sudo apt install python3-certbot-nginx 
+sudo apt install nginx
+
+add new file in sites-available
+
+ln -s to /etc/nginx/sites-enabled
+
+
+    location /demo/ {
+        proxy_pass http://<localaddress>/;
+    }
+
+
+sudo certbot --nginx -d home.penguintutor.com
+
+This updates /etc/nginx/sites-enabled
+
+update with 
+sudo nginx -t
+sudo nginx -s reload
+
+Add the following to crontab for root:
+0 12 * * * /usr/bin/certbot renew --quiet
+
+This checks for updates on a daily basis and if required renew
+
+## Login
+
 New login features requires that users login to the web interface. This would prevent automation from working, therefore an alternative is allowed where clients can be pre-authorized based on their IP address. 
 
 If automation runs on the local machine then it is recommended that only the loopback IP address 127.0.0.1 is pre-authorized, but additional IP addresses can be enabled for use by WiFi switches, such as those used in the [ESP32 wireless capacitive touch switch](http://www.penguintutor.com/projects/esp32-captouch).

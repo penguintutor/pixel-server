@@ -115,7 +115,7 @@ function apply() {
     });
     // if no colors send default = white
     if (color_list == "") color_list = "ffffff";
-    url_string = "/set?seq="+sequence+"&delay="+delay+"&reverse="+reverse_str+"&colors="+color_list;
+    url_string = "set?seq="+sequence+"&delay="+delay+"&reverse="+reverse_str+"&colors="+color_list;
     $.get( url_string, function (data) {
         // Convert from json to user string
         status_string = format_status (data);
