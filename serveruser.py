@@ -10,7 +10,7 @@ class ServerUser ():
         self.description = description
 
     # return formatted for writing to file
-    def file_format(self):
-	    return "{}:{}:{}:{}:{}:{}\n".format(self.username, self.password_hash, self.real_name, self.user_type, self.email, self.description)
+    def colon_string(self):
+	    return "{}:{}:{}:{}:{}:{}".format(self.username, self.password_hash, self.real_name, self.user_type, self.email, self.description)
 
 	    

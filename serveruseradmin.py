@@ -67,7 +67,7 @@ class ServerUserAdmin():
         try:
             with open(self.filename, "w") as write_file:
                 for this_user in self.users.values():
-                    write_file.write(this_user.file_format())
+                    write_file.write(this_user.colon_string()+"\n")
         except Exception as e:
             print ("Error saving file to "+self.filename+" "+str(e))
             return False
@@ -91,12 +91,15 @@ class ServerUserAdmin():
         self.save_users()
 
 
-
     def user_exists (self, username):
         if username in self.users.keys():
             return True
         return False
 
+    def check_admin (self, username):
+        if username in self.users.keys() and self.users[username].user_type == "admin":
+            return True
+        return False
 
     # returns string with the hashed password
     # uses blake2b

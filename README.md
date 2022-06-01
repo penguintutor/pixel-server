@@ -222,5 +222,12 @@ If you installed the software using a _git clone_ then you can update by issuing
 
 As long as you followed the instructions regarding using a custom configuration file, then your config will still be kept.
 
+# Development
 
+## Testing
+
+Currently supports limited automated testing based around the authentication. This is achieved using:
+    py.test-3
+    
+Manual testing is required for all other functions.
 

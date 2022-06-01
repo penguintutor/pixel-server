@@ -28,6 +28,16 @@ def test_add_another_user():
         "")
     assert user_admin.user_exists("longerusername")
     
+# password includes :
+def test_add_user_2():
+    user_admin = ServerUserAdmin(_user_filename)
+    user_admin.add_user(
+        "test2", "password123!:4", 
+        "",
+        "normal", "email@somewhere.com",
+        "User has no real name")
+    assert user_admin.user_exists("longerusername")
+    
 # Check if users added previously still exists
 def test_persistant_users():
     user_admin = ServerUserAdmin(_user_filename)
@@ -48,3 +58,11 @@ def test_user_password():
 def test_incorrect_password():
     user_admin = ServerUserAdmin(_user_filename)
     assert not user_admin.check_username_password ("longerusername", "passw0rd123")
+    
+def test_user1_admin():
+    user_admin = ServerUserAdmin(_user_filename)
+    assert user_admin.check_admin ("test1")
+    
+def test_user2_not_admin():
+    user_admin = ServerUserAdmin(_user_filename)
+    assert not user_admin.check_admin ("test2")
