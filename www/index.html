@@ -10,7 +10,21 @@
         </head>
 
     <body>
-        <div id="divapplybuttons"><button type="button" id="applybutton" onclick="apply()">Apply</button><button type="button" id="reversebutton" class="reverse-not-selected" onclick="reverse_toggle()">Reverse</button></div>
+        <div id="divapplybuttons"><button type="button" id="applybutton" onclick="apply()">Apply</button><button type="button" id="reversebutton" class="reverse-not-selected" onclick="reverse_toggle()">Reverse</button>
+        
+        <span id="userlogin">
+        {% if user %}
+            <span id="loggedinuser">{{ user }}</span>
+            <button type="button" id="logoutbutton" onclick="logout()">Logout</button>
+        {% else %}
+            <button type="button" id="loginbutton" onclick="login()">Login</button>
+        {% endif %}
+        
+        </span>
+
+        </div>
+        
+
         <div id="sequences"><h2>Sequences</h2>
           <ul id="sequences-list">
           </ul>

@@ -165,9 +165,15 @@ function add_color(this_color) {
     // Add this list element
     // chosencolor class is not for css, but for iterating over the 
     // chosen colors (excluding default)
-    //$("#ulcolchosen").append("<li class=\"licolchosen\"><button name=\""+this_color+"\" class=\"buttoncolchosen chosencolor\" style=\"background:#"+this_color+"\" onclick=\"remove_color($(this))\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button></li>");
     $("#ulcolchosen").append("<li class=\"licolchosen\"><button name=\""+this_color+"\" class=\"buttoncolchosen chosencolor col"+this_color+"\" style=\"background:#"+this_color+"\" onclick=\"remove_color($(this))\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button></li>");
 }
 
+// Redirect to login
+function login() {
+    window.location.href="login";
+}
 
-
+// Redirect to logout
+function logout() {
+    window.location.href="logout";
+}

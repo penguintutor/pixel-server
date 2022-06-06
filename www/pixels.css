@@ -74,6 +74,30 @@ ul ul ul { margin: 0;}
     height: 75px;
 }
 
+#loginbutton {
+    background-color: #ffffff;
+    border: none;
+    padding: 15px;
+    text-align: center;
+    font-size: 16pt;
+    margin: 10px;
+    cursor: pointer;
+    width:  150px;
+    height: 75px;
+}
+
+#logoutbutton {
+    background-color: #ffffff;
+    border: none;
+    padding: 15px;
+    text-align: center;
+    font-size: 16pt;
+    margin: 10px;
+    cursor: pointer;
+    width:  150px;
+    height: 75px;
+}
+
 
 #reversebutton {
     border: none;
@@ -85,6 +109,14 @@ ul ul ul { margin: 0;}
     width:  110px;
     height: 75px;
     border-radius: 45%;
+}
+
+#userlogin {
+    float:right;
+}
+
+#loggedinuser {
+    font-size: 16pt;
 }
 
 .speed-slider {

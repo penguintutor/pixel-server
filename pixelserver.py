@@ -95,7 +95,7 @@ def login():
         if (auth.login_user(username, password, request.remote_addr) == True):
             # create session
             session['username'] = username
-            return render_template('index.html')
+            return render_template('index.html', user=username)
         # Reach here then failed login attempt
         return render_template('login.html', message='Invalid login attempt')
     # New visit to login page

@@ -1,4 +1,3 @@
-#from hashlib import blake2b
 from argon2 import PasswordHasher
 
 class ServerUser ():
@@ -30,7 +29,9 @@ class ServerUser ():
 	    
 	    
     # returns string with the hashed password
-    # uses argon2
+    # uses argon2 which is a strong hash, but takes approx 8 seconds 
+    # on a Pi Zero - could use a different hash for speed, but would
+    # likely be less secure
     @staticmethod
     def hash_password (password):
         password_bytes = bytes(password, 'utf-8')
