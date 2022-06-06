@@ -131,7 +131,7 @@ This checks for updates on a daily basis and if required renew
 
 ## Login
 
-New login features requires that users login to the web interface. This would prevent automation from working, therefore an alternative is allowed where clients can be pre-authorized based on their IP address. 
+New login features requires that users login to the web interface. This would prevent automation from working, therefore an alternative is allowed where clients can be pre-authorized based on their IP address. All admin functions need to be logged in as an admin user
 
 If automation runs on the local machine then it is recommended that only the loopback IP address 127.0.0.1 is pre-authorized, but additional IP addresses can be enabled for use by WiFi switches, such as those used in the [ESP32 wireless capacitive touch switch](http://www.penguintutor.com/projects/esp32-captouch).
 
@@ -208,6 +208,12 @@ This code is in development and may change in operation. Details of significant 
 
 # Change log
 
+## June 2022
+Authentication and logging enabled. This is a significant change which brings in additional security. Changes may be needed to user configuration files as well as generating a new user to administer the system.
+
+You may need to install additional libraries including python3-argon2
+`sudo apt install python3-argon2`
+
 ## May 2022
 Additional color option of "Custom Color". This allows custom colors to be used through a custom.light.cfg file. This is particularly useful if you want to be able to control color using cheerlights or would like to provide your own home automation with non-volitile color changes.
 
@@ -221,6 +227,8 @@ When setting a sequence the server will now respond with a JSON formatted status
 If you installed the software using a _git clone_ then you can update by issuing a `git pull`. Alternatively you can download the latest version overwriting your existing files manually.
 
 As long as you followed the instructions regarding using a custom configuration file, then your config will still be kept.
+
+If upgrading from a version prior to June 2022 then you may need to create a new configuration file for auth.cfg and a new users.cfg file using createadmin.py
 
 # Development
 

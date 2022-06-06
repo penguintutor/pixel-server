@@ -6,6 +6,7 @@ from flask import render_template
 from flask import session
 from rpi_ws281x import *
 import threading
+import logging, os
 import random
 import string
 from pixelconfig import PixelConfig
@@ -18,10 +19,14 @@ from serverauth import ServerAuth
 # Custom settings - filenames with further configs
 auth_config_filename = "auth.cfg"
 auth_users_filename = "users.cfg"
-log_filename = "pixelserver.log"        # currently used for authentication logging
 default_config_filename = "defaults.cfg" 
 custom_config_filename = "pixelserver.cfg"
 custom_light_config_filename = "customlight.cfg"
+log_filename = "/var/log/pixelserver.log"
+
+# Turn on logging through systemd
+logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a', format='%(asctime)s %(levelname)-4s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.info ("PixelServer application start")
 
 # Globals for passing information between threads
 # needs default settings
@@ -47,19 +52,19 @@ app = Flask(
 # Create a secret_key to last whilst the program is running
 app.secret_key = ''.join(random.choice(string.ascii_letters) for i in range(15))
 
-auth = ServerAuth(auth_config_filename, auth_users_filename, log_filename)
+auth = ServerAuth(auth_config_filename, auth_users_filename)
 
 # check authentication using network and user
 # return "network", "logged_in", "login_required" or "invalid" (invalid = network rules prohibit)
 def auth_check ():
     auth_type = auth.check_network(request.remote_addr)
     # Also need to authenticate
-    if auth_type == "always":
-        return "network"
-    elif auth_type == "auth":
+    if auth_type == "always" or auth_type=="auth":
+        # even if also check for logged in useful for admin logins
         if 'username' in session:
             return "logged_in"
-        # otherwise not authenticated
+        elif (auth_type == "network"):
+            return "network"
         else: 
             return "login_required"
     return "invalid"
@@ -71,29 +76,67 @@ def main():
     # not allowed even if logged in
     if login_status == "invalid":
         return render_template('invalid.html')
-    elif login_status == "network" or login_status == "logged_in":
-        return render_template('index.html')
+    elif login_status == "network":
+        return ('index.html')
+    elif login_status == "logged_in":
+        return render_template('index.html', user=session['username'])
     else:   # login required
         return render_template('login.html')
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+    login_status = auth_check()
+    # check not an unauthorised network
+    if login_status == "invalid":
+        return render_template('invalid.html')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if (auth.login_user(username, password) == True):
+        if (auth.login_user(username, password, request.remote_addr) == True):
             # create session
             session['username'] = username
             return render_template('index.html')
-    # Reach here then login was not successful
+        # Reach here then failed login attempt
+        return render_template('login.html', message='Invalid login attempt')
+    # New visit to login page
     return render_template('login.html')
     
 @app.route("/logout")
 def logout():
-    # Don't log logouts
+    if 'username' in session:
+        username = session['username']
+        logging.info("User logged out "+username)
+    # pop off the session even if not logged in
     session.pop('username', None)
-    return render_template('login.html')
+    return render_template('login.html', message="Logged out")
+    
+# admin only available to logged in users regardless of 
+# network status
+@app.route("/useradmin")
+def useradmin():
+    # Authentication first
+    login_status = auth_check()
+    # not allowed even if logged in
+    if login_status == "invalid":
+        return render_template('invalid.html')
+    # Network approval not sufficient for useradmin - must be logged in
+    # If not approved then issue login page
+    if not (login_status == "logged_in") :
+        return render_template('login.html')
+    # Reach here then this is logged in - also need to check they are admin
+    if 'username' in session:
+        username = session['username']
+        if not (auth.check_admin(username)):
+            # If trying to do admin, but not an admin then we log them off
+            # before allowing them to login again
+            session.pop('username', None)
+            return render_template('login.html', message='Admin pemissions required')
+    # Reach here logged in as an admin user - display list of users
+    print ("Users are: .....")
+    ### Here
+        
 
+## No authentication required for generic files
 @app.route("/pixels.css")
 def css():
     return render_template('pixels.css'), 200, {'Content-Type': 'text/css; charset=utf-8'}
@@ -115,9 +158,23 @@ def jqueryui():
 def seqJSON ():
     return (seq_list.json())
     
+# set command - authentication required
+# request should either be already authenticated (eg. login successful)
+# or through automation (which needs to be in the authorised network list
+# If not then give login webpage
 @app.route("/set")
 def setSeq():
     global seq_set, upd_time, on_status
+    # Authentication first
+    login_status = auth_check()
+    # not allowed even if logged in
+    if login_status == "invalid":
+        return render_template('invalid.html')
+    # If not approved (network or logged in) then issue login page
+    if not (login_status == "network" or login_status == "logged_in"):
+        return render_template('login.html')
+    # Reach here then this is authorized (through network or logged in)
+    
     status = StatusMsg()
     status.set_server_values(seq_set)
     new_values = {}

@@ -12,20 +12,22 @@ def tmp_dir_setup (tmp_path_factory):
 def test_add_user1(tmp_path_factory):
     tmp_dir_setup(tmp_path_factory)
     user_admin = ServerUserAdmin(_user_filename)
-    user_admin.add_user(
+    result = user_admin.add_user(
         "test1", "password", 
         "Test User 1",
         "admin", "me@here.com",
         "")
+    assert result == "success"
     assert user_admin.user_exists("test1")
     
 def test_add_another_user():
     user_admin = ServerUserAdmin(_user_filename)
-    user_admin.add_user(
+    result = user_admin.add_user(
         "longerusername", "password123", 
         "Person Real Name",
         "normal", "",
         "")
+    assert result == "success"
     assert user_admin.user_exists("longerusername")
     
 # password includes :
@@ -50,15 +52,20 @@ def test_invalid_user():
     assert not user_admin.user_exists("invalid1")    
     
     
+# Test passwords
 def test_user_password():
     user_admin = ServerUserAdmin(_user_filename)
-    assert user_admin.check_username_password ("longerusername", "password123")
+    assert user_admin.check_username_password ("longerusername",
+        "password123")
     
     
 def test_incorrect_password():
     user_admin = ServerUserAdmin(_user_filename)
-    assert not user_admin.check_username_password ("longerusername", "passw0rd123")
+    assert not user_admin.check_username_password ("longerusername",
+        "passw0rd123")
     
+    
+# Test permissions
 def test_user1_admin():
     user_admin = ServerUserAdmin(_user_filename)
     assert user_admin.check_admin ("test1")
@@ -66,3 +73,36 @@ def test_user1_admin():
 def test_user2_not_admin():
     user_admin = ServerUserAdmin(_user_filename)
     assert not user_admin.check_admin ("test2")
+    
+    
+# Test handling of invalid username (includes a :)
+def test_username_colon():
+    user_admin = ServerUserAdmin(_user_filename)
+    result = user_admin.add_user(
+        "user:name", "djkD38dhJ!", 
+        "Username with colon",
+        "normal", "email@test.com",
+        "This should fail")
+    assert result != "success"
+    assert not user_admin.user_exists("user:name")
+
+# Test allows password with : (as converted to hash)
+def test_password_colon():
+    user_admin = ServerUserAdmin(_user_filename)
+    result = user_admin.add_user(
+        "user_pass_colon", "djdd:8dhJ!", 
+        "Password with colon",
+        "normal", "email@test.com",
+        "This should pass as colon allowed in password")
+    assert result == "success"
+
+
+# Test duplicate is rejected
+def test_duplicate_user():
+    user_admin = ServerUserAdmin(_user_filename)
+    result = user_admin.add_user(
+        "test1", "djddhJ!", 
+        "Duplicate user",
+        "normal", "email@test.com",
+        "This should not be a success")
+    assert result == "duplicate"

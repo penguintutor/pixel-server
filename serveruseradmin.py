@@ -1,6 +1,4 @@
 from serveruser import ServerUser
-from hashlib import blake2b
-
 
 # File format - colon seperated (colon not allowed in any of the fields)
 # username:password:real name:usertype:email:description
@@ -33,7 +31,7 @@ class ServerUserAdmin():
             with open(self.filename) as read_file:
                 for line in read_file:
                     this_line = line.strip()
-                    # check if comment in which case skipt
+                    # check if comment in which case skip
                     if (this_line.startswith("#")):
                         continue
                     # split line into fields
@@ -81,14 +79,23 @@ class ServerUserAdmin():
         # check it doesn't already exist first (based on username):
         if username in self.users.keys():
             return "duplicate"
+            
+        # Security check - ensure that none of the fields include a colon
+        # Further checks could be added (check for valid email address etc.)
+        # Password is allowed a colon as that is converted into a hash which will be colon free
+        # Could also convert colon to other character if required
+        if (':' in username or ':' in real_name or 
+            ':' in user_type or ':' in email or ':' in description):
+            return "invalid"
 
-        password_hash = self.hash_password (password_text)
+        password_hash = ServerUser.hash_password (password_text)
         
         # create the entry
         self.users[username] = ServerUser(username, password_hash, real_name, user_type, email, description)
         
         # save the changes 
         self.save_users()
+        return "success"
 
 
     def user_exists (self, username):
@@ -101,21 +108,12 @@ class ServerUserAdmin():
             return True
         return False
 
-    # returns string with the hashed password
-    # uses blake2b
-    def hash_password (self, password):
-        password_bytes = bytes(password, 'utf-8')
-        hash_alg = blake2b()
-        hash_alg.update(password_bytes)
-        return hash_alg.hexdigest()
-
-
     def check_username_password (self, username, password):
         # Check username exists
         if not username in self.users.keys():
             return False
-        # check password hash
-        if (self.hash_password(password) == self.users[username].password_hash):
+        # check password
+        if (self.users[username].check_password(password)):
             return True
         # If password fail then return false
         else: 
