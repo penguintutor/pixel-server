@@ -4,6 +4,7 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from flask import session
+from flask import redirect
 from rpi_ws281x import *
 import threading
 import logging, os
@@ -75,27 +76,28 @@ def main():
     login_status = auth_check()
     # not allowed even if logged in
     if login_status == "invalid":
-        return render_template('invalid.html')
+        return redirect('/invalid')
     elif login_status == "network":
         return ('index.html')
     elif login_status == "logged_in":
         return render_template('index.html', user=session['username'])
     else:   # login required
-        return render_template('login.html')
+        #return render_template('login.html')
+        return redirect('/login')
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     login_status = auth_check()
     # check not an unauthorised network
     if login_status == "invalid":
-        return render_template('invalid.html')
+        return redirect('/invalid')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         if (auth.login_user(username, password, request.remote_addr) == True):
             # create session
             session['username'] = username
-            return render_template('index.html', user=username)
+            return redirect('/')
         # Reach here then failed login attempt
         return render_template('login.html', message='Invalid login attempt')
     # New visit to login page
@@ -118,11 +120,11 @@ def useradmin():
     login_status = auth_check()
     # not allowed even if logged in
     if login_status == "invalid":
-        return render_template('invalid.html')
+        return redirect('/invalid')
     # Network approval not sufficient for useradmin - must be logged in
     # If not approved then issue login page
     if not (login_status == "logged_in") :
-        return render_template('login.html')
+        return redirect('/login')
     # Reach here then this is logged in - also need to check they are admin
     if 'username' in session:
         username = session['username']
@@ -152,6 +154,10 @@ def jquery():
 @app.route("/jquery-ui.min.js")
 def jqueryui():
     return render_template('jquery-ui.min.js'), 200, {'Content-Type': 'text/javascript; charset=utf-8'}
+    
+@app.route("/invalid")
+def invalid():
+    return render_template('invalid.html')
     
 # provides list of sequences - don't authenticate
 @app.route("/sequences.json")
