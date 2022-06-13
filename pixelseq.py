@@ -224,14 +224,14 @@ class PixelSeq():
             }
         
         self.strip = PixelStrip (
-            pixel_config.ledcount,
-            pixel_config.gpiopin,
-            pixel_config.ledfreq,
-            pixel_config.leddma,
-            pixel_config.ledinvert,
-            pixel_config.ledmaxbrightness,
-            pixel_config.ledchannel,
-            pixel_config.striptype
+            pixel_config.settings['ledcount'],
+            pixel_config.settings['gpiopin'],
+            pixel_config.settings['ledfreq'],
+            pixel_config.settings['leddma'],
+            pixel_config.settings['ledinvert'],
+            pixel_config.settings['ledmaxbrightness'],
+            pixel_config.settings['ledchannel'],
+            pixel_config.settings['striptype']
             )
         self.strip.begin()
         # During startup turn all LEDs off

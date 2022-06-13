@@ -72,6 +72,7 @@ def auth_check ():
 
 
 @app.route("/")
+@app.route("/home")
 def main():
     login_status = auth_check()
     # not allowed even if logged in
@@ -80,9 +81,14 @@ def main():
     elif login_status == "network":
         return ('index.html')
     elif login_status == "logged_in":
-        return render_template('index.html', user=session['username'])
+        # Also check if admin - to show settings button
+        username = session['username']
+        if (auth.check_admin(username)):
+            admin = True
+        else:
+            admin = False
+        return render_template('index.html', user=session['username'], admin=admin)
     else:   # login required
-        #return render_template('login.html')
         return redirect('/login')
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -112,8 +118,43 @@ def logout():
     session.pop('username', None)
     return render_template('login.html', message="Logged out")
     
-# admin only available to logged in users regardless of 
+# admin and settings only available to logged in users regardless of 
 # network status
+@app.route("/settings", methods=['GET', 'POST'])
+def settings():
+    global pixel_conf
+    # Authentication first
+    login_status = auth_check()
+    # not allowed even if logged in
+    if login_status == "invalid":
+        return redirect('/invalid')
+    # Network approval not sufficient for useradmin - must be logged in
+    # If not approved then issue login page
+    if not (login_status == "logged_in") :
+        return redirect('/login')
+    # Reach here then this is logged in - also need to check they are admin
+    username = session['username']
+    if not (auth.check_admin(username)):
+        # If trying to do admin, but not an admin then we log them off
+        # before allowing them to login again
+        session.pop('username', None)
+        return render_template('login.html', message='Admin pemissions required')
+    
+    # Reach here logged in as an admin user - update settings and/or display setting options
+    if request.method == 'POST':
+        #username = request.form['username']
+        pass
+        # process form here
+        
+    
+    
+    settingsform = pixel_conf.to_html_form()
+    # This passes html to the template so turn off autoescaping in the template eg. |safe
+    return render_template('settings.html', user=username, admin=True, form=settingsform)
+
+
+
+
 @app.route("/useradmin")
 def useradmin():
     # Authentication first

@@ -1,7 +1,7 @@
 # pixel-server
 Wireless control of PixelStrips or NeoPixels using a web graphical interface running on a Raspberry Pi.
 
-Works with any Raspberry Pi. 
+Works with any Raspberry Pi.
 
 For more details see:
 <http://www.penguintutor.com/projects/pixel-server>
@@ -39,7 +39,7 @@ On a Raspberry Pi, open a terminal and enter the following commands:
 
     cd /opt
     sudo mkdir pixel-server
-    sudo chown $USER: pixel-server 
+    sudo chown $USER: pixel-server
     git clone https://github.com/penguintutor/pixel-server.git pixel-server
 
 Then to have it start automatically run the following:
@@ -62,7 +62,7 @@ For more information see: [Penguin Tutor guide to starting programs automaticall
 
 ## Enable SSL (HTTPS)
 
-This explains how you can use the Flask (development) server with https using Nginx as a reverse proxy. This uses a free security certificate from [Let's Encrypt](https://letsencrypt.org/). This means that I am able to setup Nginx as a reverse proxy on my home server, which could be used to provide encrypted connections to different services. 
+This explains how you can use the Flask (development) server with https using Nginx as a reverse proxy. This uses a free security certificate from [Let's Encrypt](https://letsencrypt.org/). This means that I am able to setup Nginx as a reverse proxy on my home server, which could be used to provide encrypted connections to different services.
 
 
 ### On local pi with pixel-server
@@ -77,21 +77,21 @@ Create a file /etc/systemd/system/gunicorn.service with the following:
     [Unit]
     Description=gunicorn daemon
     After=network.target
-    
+
     [Service]
     User=www-data
     Group=www-data
     WorkingDirectory=/var/www/application/
-    
+
     ExecStart=/usr/bin/gunicorn --access-logfile - --workers 3 --bind
     unix:/var/www/application.sock wsgi:app
-    
+
     [Install]
     WantedBy=multi-user.target
 
-    
 
-    
+
+
 
 ### On Nginx reverse proxy
 
@@ -101,26 +101,27 @@ First make sure your system is up-to-date
 
 sudo apt update
 sudo apt upgrade
+sudo apt install nginx
 
 sudo apt install certbot
-sudo apt install python3-certbot-nginx 
-sudo apt install nginx
+sudo apt install python3-certbot-nginx
+
 
 add new file in sites-available
 
 ln -s to /etc/nginx/sites-enabled
 
 
-    location /demo/ {
+    location /rpi1/ {
         proxy_pass http://<localaddress>/;
     }
 
 
-sudo certbot --nginx -d home.penguintutor.com
+sudo certbot --nginx -d <public hostname>
 
 This updates /etc/nginx/sites-enabled
 
-update with 
+update with
 sudo nginx -t
 sudo nginx -s reload
 
@@ -131,10 +132,16 @@ This checks for updates on a daily basis and if required renew
 
 ## Login
 
-New login features requires that users login to the web interface. This would prevent automation from working, therefore an alternative is allowed where clients can be pre-authorized based on their IP address. All admin functions need to be logged in as an admin user
+New login features requires that users login to the web interface. This would prevent automation from working, therefore an alternative is allowed where clients can be pre-authorized based on their IP address. All admin functions need to be logged in as an admin user.
 
 If automation runs on the local machine then it is recommended that only the loopback IP address 127.0.0.1 is pre-authorized, but additional IP addresses can be enabled for use by WiFi switches, such as those used in the [ESP32 wireless capacitive touch switch](http://www.penguintutor.com/projects/esp32-captouch).
 
+
+There are no users setup as default. Before you can login then you should create your first admin user with the following command:
+
+    python3 createadmin.py <username> <password> >> users.cfg
+
+The angled brackets should not be included around the username or password. The double greater than will append to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up with multiple users with the same username using this command. Instead once you have setup the initial user you should login through the web interface to configure additional users.
 
 # Automation
 
@@ -149,7 +156,7 @@ An additional setting available for automation is &toggle=True. When turned on t
 
 ## Cheerlights / Custom color
 
-New custom color option. You can create (or use an external program) a file called customlight.cfg. This file should contain a single color or list of colors (one color per line). They should be in html RRGGBB color format, with or without a #. 
+New custom color option. You can create (or use an external program) a file called customlight.cfg. This file should contain a single color or list of colors (one color per line). They should be in html RRGGBB color format, with or without a #.
 Any lines not recognised are ignored.
 
 To use in automation use the word "custom" in place of the RGB value in the URL string.
@@ -163,7 +170,7 @@ If you would like to have the lights automatically update to the latest cheerlig
     */5 * * * * wget -O ~/pixel-server/customlight.cfg http://api.thingspeak.com/channels/1417/field/2/last.txt
 
 The ~ assumes that this is installed in your home directory.
-    
+
 # Configuration
 
 The default configuration is in a file called **defaults.cfg**. You should not edit that file directly as it will be overwritten by future upgrades. Instead copy the relevant entries to a new file called **pixelserver.cfg**.
@@ -184,22 +191,22 @@ The striptype can be set using a color sequence. For WS2811 / WS2812B strips the
 
 For SK6812 strips then it should be four letters also including W for white. eg. _GRBW_ for green, red, blue and then white.
 
-Alternatively the strip type can be defined as one of the following values:  
-WS2811_STRIP_RGB  
-WS2811_STRIP_RBG  
-WS2811_STRIP_GRB  
-WS2811_STRIP_BGR  
-WS2811_STRIP_BRG  
-WS2811_STRIP_BGR  
-WS2812_STRIP  
-SK6812_STRIP_RGBW  
-SK6812_STRIP_RBGW  
-SK6812_STRIP_GRBW  
-SK6812_STRIP_GBRW  
-SK6812_STRIP_BRGW  
-SK6812_STRIP_BGRW  
-SK6812_STRIP  
-SK6812W_STRIP  
+Alternatively the strip type can be defined as one of the following values:
+WS2811_STRIP_RGB
+WS2811_STRIP_RBG
+WS2811_STRIP_GRB
+WS2811_STRIP_BGR
+WS2811_STRIP_BRG
+WS2811_STRIP_BGR
+WS2812_STRIP
+SK6812_STRIP_RGBW
+SK6812_STRIP_RBGW
+SK6812_STRIP_GRBW
+SK6812_STRIP_GBRW
+SK6812_STRIP_BRGW
+SK6812_STRIP_BGRW
+SK6812_STRIP
+SK6812W_STRIP
 
 
 # Updates and changes
@@ -221,7 +228,7 @@ Additional color option of "Custom Color". This allows custom colors to be used 
 ## April 2022
 When setting a sequence the server will now respond with a JSON formatted status replacing the previous single word "ready" or simple error message. This provides feedback on the status of the request as well as what sequence is currently being displayed.
 
-    
+
 # Upgrading to the latest version
 
 If you installed the software using a _git clone_ then you can update by issuing a `git pull`. Alternatively you can download the latest version overwriting your existing files manually.
@@ -236,6 +243,5 @@ If upgrading from a version prior to June 2022 then you may need to create a new
 
 Currently supports limited automated testing based around the authentication. This is achieved using:
     py.test-3
-    
-Manual testing is required for all other functions.
 
+Manual testing is required for all other functions.

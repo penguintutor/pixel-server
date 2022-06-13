@@ -23,12 +23,36 @@ class PixelConfig():
         
     }
     
+    # What configs options can be set
+    # Min and max are just general check mainly for numbers
+    # For string max is maximum number characters
+    # min and max are required even if ignored / None (eg bool)
+    # For list / dictionary then minimum is name of list / dictionary and maximum = "radio" or "checkbox"
+    # dictionary shows value as option (key as value)
+    # dictionary-keys is a compromise - dictionary for loading, uses keys only for options
+    # Can instead use list and .keys() if want to use keys
+    # Comment can be used for tooltips
+    # configsetting: list [Label, type, min, max, comment]
+    config_settings = {
+        'ledcount' : ["Number LEDs", "number", 1, 10000, "Number of LEDs on strip"],
+        'gpiopin' : ["GPIO Pin No.", "number", 0, 100, "Raspberry Pi GPIO number (eg. 18)"],
+        'ledfreq' : ["LED Frequency", "number", 0, 1000000, "Normally 800000"],
+        'leddma' : ["LED DMA", "number", 0, 100, "DMA number, normally 5"],
+        'ledmaxbrightness': ["Brightness", "number", 0, 255, "0 to 255"],
+        'ledinvert' : ['Invert LED?', "bool", "", "", "True or False"],
+        'ledchannel' : ["LED Channel", "number", 0, 10, "Normally 0"],
+        'striptype' : ["LED Strip", "dictionary-keys", strip_types, "radio", "Strip type"]
+    }
+    
     def __init__ (self, default_config, custom_config, light_config):
         # default config file name (if not exist then uses default)
         self.defaultcfg = default_config
         self.customcfg = custom_config
         self.customlightcfg = light_config
         self.errormsg = ""
+        
+        # store the actual settings in this dictionary
+        self.settings= {}
 
         ''' 
         Example defaults
@@ -77,76 +101,50 @@ class PixelConfig():
                     # strip any spaces
                     key = key.strip()
                     value = value.strip()
-                    # validate value and store
-                    if (key == "ledcount"):
-                        value_int = int(value)
-                        if (value_int > 0):
-                            self.ledcount = value_int
-                        else:
-                            self.errormsg = "Invalid ledcount value "+value
-                            return -2
-                    elif (key == "gpiopin"):
-                        value_int = int(value)
-                        # Only basic check in a valid range - may not be valid gpio number
-                        if (value_int >=0 and value_int <=60):
-                            self.gpiopin = value_int
-                        else:
-                            self.errormsg = "Invalid gpiopin value "+value
-                            return -2
-                    elif (key == "ledfreq"):
-                        value_int = int(value)
-                        if (value_int >= 1000 and value_int <= 2000000):
-                            self.ledfreq = value_int
-                        else:
-                            self.errormsg = "Invalid ledfeq value "+value
-                            return -2
-                    elif (key == "leddma"):
-                        value_int = int(value)
-                        if (value_int >= 0 and value_int <= 20):
-                            self.leddma = value_int
-                        else:
-                            self.errormsg = "Invalid leddma value "+value
-                            return -2
-                    elif (key == "ledmaxbrightness"):
-                        value_int = int(value)
-                        if (value_int > 0 and value_int <= 255):
-                            self.ledmaxbrightness = value_int
-                        else:
-                            self.errormsg = "Invalid ledmaxbrightness value "+value
-                            return -2
-                    elif (key == "ledinvert"):
-                        if (value.lower() == "false"):
-                            self.ledinvert = False
-                        elif (value.lower() == "true"):
-                            self.ledinvert = True
-                        else :
-                            self.errormsg = "Invalid ledinvert value "+value
-                            return -2
-                    elif (key == "ledchannel"):
-                        value_int = int(value)
-                        if (value_int >= 0 and value_int <= 10):
-                            self.ledchannel = value_int
-                        else :
-                            self.errormsg = "Invalid ledchannel value "+value
-                            return -2
-                    elif (key == "striptype"):
-                        # Allows abbreviated version (eg. RGB = WS2811_STRIP_RGB)
-                        # or long version
-                        # If it's short 3 chars add WS2811
-                        # If it's short 4 chars add SK6812
-                        # first remove any whitespace
-                        value = value.strip()
-                        if (len(value) == 3):
-                            strip_value = "WS2811_STRIP_"+value
-                        elif (len(value) == 4):
-                            strip_value = "SK6812_STRIP_"+value
-                        else:
-                            strip_value = value
-                        if strip_value in PixelConfig.strip_types:
-                            self.striptype = PixelConfig.strip_types[strip_value]
-                        else:
-                            self.errormsg = "Invalid striptype value "+value
-                            return -2
+                    
+                    if key in PixelConfig.config_settings.keys():
+                        # validate based on type
+                        this_setting = PixelConfig.config_settings[key]
+                        
+                        # Special case striptype allows shortened versions to maintain compatibility
+                        
+                        if (key == "striptype"):
+                            # # Allows abbreviated version (eg. RGB = WS2811_STRIP_RGB)
+                            # or long version
+                            # If it's short 3 chars add WS2811
+                            # If it's short 4 chars add SK6812
+                            if (len(value) == 3):
+                                value = "WS2811_STRIP_"+value
+                            elif (len(value) == 4):
+                                value = "SK6812_STRIP_"+value
+                        # Now changed this to full strip type so will be accepted using normal dictionary check
+                        
+                        # Generic values
+                        if (this_setting[1] == "number"):
+                            value_int = int(value)
+                            if (value_int >= this_setting[2] and value_int <= this_setting[3]):
+                                self.settings[key] = value_int
+                            else:
+                                self.errormsg = "Invalid number for {} - value {}".format(key, value)
+                                
+                        elif (this_setting[1] == "bool"):
+                            if (value.lower() == "false"):
+                                self.settings[key] = False
+                            elif (value.lower() == "true"):
+                                self.settings[key] = True
+                            else :
+                                self.errormsg = "Invalid boolean for {} - value   {}".format(key, value)
+                                return -2
+                        # List - only radio supported at the moment
+                        elif (this_setting[1] == "dictionary" or this_setting[1] == "dictionary-keys"):
+                            if value in this_setting[2].keys():
+                                self.settings[key] = this_setting[2][value]
+                            else:
+                                self.errormsg = "Invalid dictionary for {} value {}".format(key, value)
+                                print (self.errormsg)
+                                return -2 
+                        ## List not yet implemented
+
                     else:
                         self.errormsg = "Unknown entry "+key+" in "+filename
                         return -2
@@ -163,6 +161,52 @@ class PixelConfig():
             return -1
             
         return 1
-            
+
+    # returns config options as form for html
+    # does not include <form> or </form> which can be set seperately
+    def to_html_form(self):
+        html_string = ""
+        for key, value in PixelConfig.config_settings.items():
+            html_string += "<label for=\"{}\" title=\"{}\">{}:</label>\n".format(key, value[4], value[0])
+            # Text or number is the same input type
+            if value[1] == "number" or value[1] == "text":
+                html_string += "<input type=\"text\" id=\"{}\" name=\"{}\" value=\"{}\">".format(key, key, self.settings[key])
+            elif value[1] == "bool":
+                if self.settings[key]:
+                    html_string += "<input type=\"checkbox\" id=\"{}\" checked=\"checked\">".format(key)
+                else:
+                    html_string += "<input type=\"checkbox\" id=\"{}\">".format(key)
+            elif value[1] == "dictionary":
+                html_string += "<select name=\"{}\" id=\"{}\">\n".format(key, key)
+                for this_key, this_value in value[2].items():
+                    if self.settings[key] == this_key:
+                        html_string += "<option value=\"{}\" selected>{}</option>\n".format(this_key, this_value)
+                    else:
+                        html_string += "<option value=\"{}\">{}</option>\n".format(this_key, this_value)
+                html_string += "</select>\n"
+            # List is same as dictionary, but key and value are same
+            elif value[1] == "list":
+                html_string += "<select name=\"{}\" id=\"{}\">\n".format(key, key)
+                for this_value in value[2]:
+                    if self.settings[key] == this_value:
+                        html_string += "<option value=\"{}\" selected>{}</option>\n".format(this_value, this_value)
+                    else:
+                        html_string += "<option value=\"{}\">{}</option>\n".format(this_value, this_value)
+                html_string += "</select>\n"
+            # special case - it is a dictionary, but treat like a list (use keys)
+            elif value[1] == "dictionary-keys":
+                html_string += "<select name=\"{}\" id=\"{}\">\n".format(key, key)
+                for this_value in value[2].keys():
+                    if self.settings[key] == this_value:
+                        html_string += "<option value=\"{}\" selected>{}</option>\n".format(this_value, this_value)
+                    else:
+                        html_string += "<option value=\"{}\">{}</option>\n".format(this_value, this_value)
+                html_string += "</select>\n"
+                
+            html_string += "<span title=\"{}\">?</span><br />\n".format(value[4])
+        return html_string
+        
+    def get_settings_dict(self):
+        return self.config_settings
 
 	

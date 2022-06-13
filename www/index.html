@@ -15,6 +15,9 @@
         <span id="userlogin">
         {% if user %}
             <span id="loggedinuser">{{ user }}</span>
+            {% if admin %}
+                <button type="button" id="settingsbutton" onclick="settings()">Settings</button>
+            {% endif %}
             <button type="button" id="logoutbutton" onclick="logout()">Logout</button>
         {% else %}
             <button type="button" id="loginbutton" onclick="login()">Login</button>

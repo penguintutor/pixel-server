@@ -168,6 +168,12 @@ function add_color(this_color) {
     $("#ulcolchosen").append("<li class=\"licolchosen\"><button name=\""+this_color+"\" class=\"buttoncolchosen chosencolor col"+this_color+"\" style=\"background:#"+this_color+"\" onclick=\"remove_color($(this))\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button></li>");
 }
 
+
+// Redirect to settings
+function settings() {
+    window.location.href="settings";
+}
+
 // Redirect to login
 function login() {
     window.location.href="login";
@@ -176,4 +182,14 @@ function login() {
 // Redirect to logout
 function logout() {
     window.location.href="logout";
+}
+
+// Redirect to main page
+function go_index() {
+    window.location.href="home";
+}
+
+// Submit form from button outside of the form
+function save_settings() {
+    $( "#settingsform" ).submit();
 }

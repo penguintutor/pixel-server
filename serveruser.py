@@ -27,6 +27,10 @@ class ServerUser ():
         # Shouldn't get this but in case changes in future
         return False
 	    
+    def is_admin(self):
+	    if self.user_type == "admin":
+	        return True
+	    return False
 	    
     # returns string with the hashed password
     # uses argon2 which is a strong hash, but takes approx 8 seconds 

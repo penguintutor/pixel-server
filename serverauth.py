@@ -20,7 +20,7 @@ class ServerAuth ():
         self.network_allow_auth = []            # as above, but does require authentication (normally this is 0.0.0.0 = allow all, but with authentication
         
         # Load the config file - this will include any network authorizations
-        success = self.load_config (self.config_filename)
+        success = self.load_config ()
         if (success == 0):
             #print ("No authentication config file "+self.config_filename)
             logging.warning("No authentication config file "+ self.config_filename)
@@ -39,7 +39,8 @@ class ServerAuth ():
     # If error also populate self.error_msg
     # Includes some validation checks, but these are very crude
     # to detect mistakes rather than security reasons
-    def load_config(self, filename):
+    def load_config(self):
+        filename = self.config_filename
         # Try and open file - if not exist then just return
         try:
             with open (filename, "r") as cfg_file:
@@ -75,7 +76,8 @@ class ServerAuth ():
         
     # Loads the information about a single user and returns as
     # ServerUser object, otherwise returns None
-    def load_user (self, user_filename, username):
+    def load_user (self, username):
+        user_filename = self.users_filename
         try:
             with open(user_filename) as read_file:
                 for line in read_file:
@@ -102,7 +104,7 @@ class ServerAuth ():
         if ':' in username: 
             logging.warning (ip_address+" Login failed username contains colon "+username)
             return False
-        this_user = self.load_user (self.users_filename, username)
+        this_user = self.load_user (username)
         if this_user == None:
             # Could also be corrupt file or similar, but most likely invalid username - check log for corrupt file error
             logging.warning (ip_address+" Login failed invalid username "+username)
@@ -162,5 +164,12 @@ class ServerAuth ():
 	    logging.info(log_string+"none\n")
 	    return ("none")
 	    
+    def check_admin(self, username):
+	    this_user = self.load_user (username)
+	    if this_user == None: 
+	        return False
+	    if this_user.is_admin(): 
+	        return True
+	    return False
 	    
 	
