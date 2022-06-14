@@ -57,8 +57,8 @@ auth = ServerAuth(auth_config_filename, auth_users_filename)
 
 # check authentication using network and user
 # return "network", "logged_in", "login_required" or "invalid" (invalid = network rules prohibit)
-def auth_check ():
-    auth_type = auth.check_network(request.remote_addr)
+def auth_check (ip_address):
+    auth_type = auth.check_network(ip_address)
     # Also need to authenticate
     if auth_type == "always" or auth_type=="auth":
         # even if also check for logged in useful for admin logins
@@ -74,7 +74,8 @@ def auth_check ():
 @app.route("/")
 @app.route("/home")
 def main():
-    login_status = auth_check()
+    ip_address = get_ip_address()
+    login_status = auth_check(ip_address)
     # not allowed even if logged in
     if login_status == "invalid":
         return redirect('/invalid')
@@ -93,14 +94,16 @@ def main():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    login_status = auth_check()
+    # Start by setting ip address to the real address
+    ip_address = get_ip_address()
+    login_status = auth_check(ip_address)
     # check not an unauthorised network
     if login_status == "invalid":
         return redirect('/invalid')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if (auth.login_user(username, password, request.remote_addr) == True):
+        if (auth.login_user(username, password, ip_address) == True):
             # create session
             session['username'] = username
             return redirect('/')
@@ -123,8 +126,11 @@ def logout():
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
     global pixel_conf
+    ip_address = get_ip_address()
+    # Status msg for feedback to user
+    status_msg = ""
     # Authentication first
-    login_status = auth_check()
+    login_status = auth_check(ip_address)
     # not allowed even if logged in
     if login_status == "invalid":
         return redirect('/invalid')
@@ -138,27 +144,67 @@ def settings():
         # If trying to do admin, but not an admin then we log them off
         # before allowing them to login again
         session.pop('username', None)
-        return render_template('login.html', message='Admin pemissions required')
+        return render_template('login.html', message='Admin permissions required')
     
     # Reach here logged in as an admin user - update settings and/or display setting options
     if request.method == 'POST':
-        #username = request.form['username']
-        pass
-        # process form here
+        username = session['username']  # needed for logging the action
         
-    
+        update_dict = {}
+        
+        # process the form - validate all parameters
+        # Read into separate values to validate all before updating
+        for key, value in request.form.items():
+            #print ("Key {} Value {}".format(key, value))
+            (status, temp_value) = pixel_conf.validate_parameter(key, value)
+            #print ("Status {} Value {}".format(status, temp_value))
+            # If we get an error at any point - don't save and go back to 
+            # showing current status
+            if (status == False):
+                status_msg = temp_value
+                #print (status_msg)
+                break
+            # Save this for updating values - use returned value in 
+            # case it's been sanitised
+            update_dict[key] = temp_value
+            #print ("Dict updated with {} Value {}".format(key, temp_value))
+            
+        # special case any checkboxes are only included if checked
+        if not ("ledinvert" in request.form.keys()):
+            update_dict["ledinvert"] = False
+            
+                
+        # As long as no error save
+        if (status_msg == ""):
+            for key,value in update_dict.items():
+                if (pixel_conf.update_parameter(key, value) == False): 
+                    status_msg = "Error updating settings"
+                    logging.info("Error updating settings by "+username)
+                    
+        # Check no error and if so then save
+        if not pixel_conf.save_settings():
+            status_msg = "Error saving custom config file"
+            logging.info("Error saving custom config file")
+            
+                    
+        # As long as still no error then report success
+        if (status_msg == ""):
+            status_msg = "Updates saved"
+            logging.info("Settings updated by "+username)
+            
     
     settingsform = pixel_conf.to_html_form()
     # This passes html to the template so turn off autoescaping in the template eg. |safe
-    return render_template('settings.html', user=username, admin=True, form=settingsform)
+    return render_template('settings.html', user=username, admin=True, form=settingsform, message=status_msg)
 
 
 
 
 @app.route("/useradmin")
 def useradmin():
+    ip_address = get_ip_address()
     # Authentication first
-    login_status = auth_check()
+    login_status = auth_check(ip_address)
     # not allowed even if logged in
     if login_status == "invalid":
         return redirect('/invalid')
@@ -173,10 +219,11 @@ def useradmin():
             # If trying to do admin, but not an admin then we log them off
             # before allowing them to login again
             session.pop('username', None)
-            return render_template('login.html', message='Admin pemissions required')
+            return render_template('login.html', message='Admin permissions required')
     # Reach here logged in as an admin user - display list of users
     print ("Users are: .....")
     ### Here
+    return render_template ('useradmin.html')
         
 
 ## No authentication required for generic files
@@ -323,6 +370,16 @@ def mainThread():
         last_update = upd_time
         # Sleep used for delay this means that there will be that long a delay between updates
         time.sleep(seq_set['delay']/1000)
+
+
+# Gets IP address - supports proxy headers or normal network
+def get_ip_address():
+    # Start by setting ip address to the real address
+    ip_address = request.remote_addr
+    # if Nginx proxy then take real_address
+    if 'CLIENT_ADDRESS' in request.headers:
+        ip_address = request.headers.get('CLIENT_ADDRESS')
+    return ip_address
 
 if __name__ == "__main__":
     # run as two threads - main thread and flask thread

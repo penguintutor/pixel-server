@@ -25,7 +25,8 @@ class PixelConfig():
     
     # What configs options can be set
     # Min and max are just general check mainly for numbers
-    # For string max is maximum number characters
+    # number = int ; float = floating point
+    # For text = string max is maximum number characters
     # min and max are required even if ignored / None (eg bool)
     # For list / dictionary then minimum is name of list / dictionary and maximum = "radio" or "checkbox"
     # dictionary shows value as option (key as value)
@@ -162,6 +163,78 @@ class PixelConfig():
             
         return 1
 
+
+    # Returns tuple (status, value / message)
+    # status = True (success)
+    # status = False (invalid parameter)
+    def validate_parameter (self, parameter, value):
+        if not parameter in PixelConfig.config_settings.keys():
+            return (False, "Invalid parameter {}".parameter)
+        config_params = PixelConfig.config_settings[parameter]
+        if config_params[1] == "number":
+            try:
+                temp_value = int(value)
+            except: 
+                return (False, "Parameter is not a number {}".format(parameter))
+            if (temp_value < config_params[2] or temp_value > config_params[3]):
+                return (False, "Invalid value for number {}".format(parameter))
+            # otherwise valid number, return true
+            return (True, temp_value)
+        elif config_params[1] == "text":
+            if len(value) < config_params[2] or len(value) > config_params[2]:
+                return (False, "Invalid string length {}".format(parameter))
+            else: 
+                return (True, value)
+        elif (config_params[1] == "bool"):
+            if value == True or value == "True" or value == "on" or value == "1":
+                return (True, True)
+            elif value == False or value =="False" or value == "off" or value == "0":
+                return (True, False)
+            else :
+                return (False, "Invalid parameter value {}".format(parameter))
+        elif (config_params[1] == "dictionary" or config_params[1] == "dictionary-keys"):
+            if (value in config_params[2].keys()):
+                return (True, value)
+            else:
+                return (False, "Invalid parameter value {}".format(parameter))
+        elif (config_params[1] == "list"):
+            if (value in config_params[2]):
+                return (True, value)
+            else:
+                return (False, "Invalid parameter value {}".format(parameter))
+        else: 
+            return (False, "Invalid parameter type {}".format(parameter))
+                
+        
+    # Does not validate - use validate_parameter prior to calling this
+    # Also call save after making all changes
+    # value is normally passed as a string regardless
+    # It does check for the correct type for number / bool, but not within range
+    # Returns True for success False for fail
+    def update_parameter (self, parameter, value):
+        if not parameter in PixelConfig.config_settings.keys():
+            return (False)
+        config_params = PixelConfig.config_settings[parameter]
+        
+        if (config_params[1] == "number"):
+            try:
+                self.settings[parameter] = int(value)
+            except: 
+                return False
+        elif (config_params[1] == "bool"):
+            if value == True:
+                self.settings[parameter] = True
+            elif value == False:
+                self.settings[parameter] = False
+            else:
+                return False
+        # For other values store as a string
+        else:
+            self.settings[parameter] = value
+        return True
+            
+        
+
     # returns config options as form for html
     # does not include <form> or </form> which can be set seperately
     def to_html_form(self):
@@ -173,9 +246,9 @@ class PixelConfig():
                 html_string += "<input type=\"text\" id=\"{}\" name=\"{}\" value=\"{}\">".format(key, key, self.settings[key])
             elif value[1] == "bool":
                 if self.settings[key]:
-                    html_string += "<input type=\"checkbox\" id=\"{}\" checked=\"checked\">".format(key)
+                    html_string += "<input type=\"checkbox\" id=\"{}\" name=\"{}\" checked=\"checked\">".format(key, key)
                 else:
-                    html_string += "<input type=\"checkbox\" id=\"{}\">".format(key)
+                    html_string += "<input type=\"checkbox\" id=\"{}\" name=\"{}\">".format(key, key)
             elif value[1] == "dictionary":
                 html_string += "<select name=\"{}\" id=\"{}\">\n".format(key, key)
                 for this_key, this_value in value[2].items():
@@ -209,4 +282,13 @@ class PixelConfig():
     def get_settings_dict(self):
         return self.config_settings
 
-	
+
+    def save_settings (self):
+        try:
+            with open(self.customcfg, "w") as write_file:
+                for key, value in self.settings.items():
+                    write_file.write("{}={}\n".format(key, value))
+        except Exception as e:
+            print ("Error saving file to "+self.filename+" "+str(e))
+            return False
+        return True

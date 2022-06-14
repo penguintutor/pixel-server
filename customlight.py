@@ -2,7 +2,7 @@ from time import time
 import os
 import re
 
-
+# Class used to support cheerlights or other custom light color
 class CustomLight():
 
     def __init__ (self, filename):
