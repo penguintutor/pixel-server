@@ -31,6 +31,9 @@ class ServerUserAdmin():
             with open(self.filename) as read_file:
                 for line in read_file:
                     this_line = line.strip()
+                    # skipt empty line
+                    if (this_line == ""):
+                        continue
                     # check if comment in which case skip
                     if (this_line.startswith("#")):
                         continue
@@ -44,9 +47,10 @@ class ServerUserAdmin():
                             print ("Warning duplicate user entry "+user_elements[0])
                         else:
                             self.users[user_elements[0]] = ServerUser(*user_elements)
-                    except:
+                    except Exception as e:
                         # If corrupt file then just exit as can't trust to be safe
                         print ("Corrupt file - invalid entry in "+self.filename)
+                        print (str(e))
                         return False
         except FileNotFoundError:
             print ("Error file not found "+self.filename)
@@ -118,4 +122,18 @@ class ServerUserAdmin():
         # If password fail then return false
         else: 
             return False
+        
+    # Returns all users as a html table entries (does not include table / th)
+    # Links to useradmin - with action = "delete" or "edit"
+    def html_table_all (self):
+        html_text = ""
+        for userkey, uservalue in self.users.items():
+            html_text += "<tr><td><a href=\"useradmin?user="+userkey+"&action=edit\">"+userkey+"</a></td>"
+            html_text += "<td>"+uservalue.real_name+"</td>"
+            html_text += "<td>"+uservalue.user_type+"</td>"
+            html_text += "<td>"+uservalue.email+"</td>"
+            html_text += "<td><a href=\"useradmin?user="+userkey+"&action=delete\">X</a></td></tr>\n"
+        return html_text
+            
+        
 

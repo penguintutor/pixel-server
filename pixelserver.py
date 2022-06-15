@@ -15,6 +15,7 @@ from pixelseq import PixelSeq, SeqList
 from statusmsg import StatusMsg
 from customlight import CustomLight
 from serverauth import ServerAuth
+from serveruseradmin import ServerUserAdmin
 
 
 # Custom settings - filenames with further configs
@@ -148,7 +149,7 @@ def settings():
     
     # Reach here logged in as an admin user - update settings and/or display setting options
     if request.method == 'POST':
-        username = session['username']  # needed for logging the action
+        #username = session['username']  # needed for logging the action
         
         update_dict = {}
         
@@ -200,7 +201,7 @@ def settings():
 
 
 
-@app.route("/useradmin")
+@app.route("/useradmin", methods=['GET', 'POST'])
 def useradmin():
     ip_address = get_ip_address()
     # Authentication first
@@ -220,10 +221,57 @@ def useradmin():
             # before allowing them to login again
             session.pop('username', None)
             return render_template('login.html', message='Admin permissions required')
-    # Reach here logged in as an admin user - display list of users
-    print ("Users are: .....")
-    ### Here
-    return render_template ('useradmin.html')
+    # Reach here logged in as an admin user 
+    
+    # status_msg used in case we need to tell the user something
+    status_msg = ""
+
+    # if it's a post then it's either a new or edit
+    if request.method == 'POST':
+        # Here handle saving of user edit
+        pass
+    else:
+        pass 
+        # here add error message
+
+    # if it's GET action=edit then load that user
+    if request.method == "GET":
+        if 'action' in request.args.keys() and 'user' in request.args.keys():
+            requested_action = request.args.get('action')
+            requested_user = request.args.get('user')
+            # variables beginning with requested have not been validated so only use for comparisons - or perform other security checks
+            if requested_action == "edit":
+                # get user edit form
+                # here - user edit form
+                pass
+            elif requested_action == "delete":
+                # get verification
+                # here - user delete confirmation
+                pass
+            # After confirmation of deletion
+            elif requested_action == "delete-yes":
+                # get verification
+                # here - delete user
+                pass
+            else:
+                # invalid request
+
+        # If there is an action on the get, but not user (can only be used for new)
+        elif 'action' in request.args.keys() and not 'user' in request.args.keys():
+            if request.args.get('action') == "new":
+                # Here new user form
+                pass
+            else:
+                # invalid request
+                
+    # Reach here then sho        
+        
+
+    # display list of users
+    user_admin = ServerUserAdmin(auth_users_filename)
+    user_table = user_admin.html_table_all()
+
+    return render_template ('useradmin.html', table=user_table)
         
 
 ## No authentication required for generic files

@@ -280,3 +280,22 @@ ul ul ul { margin: 0;}
 .reverse-not-selected {
     background-color: #ffffff;
 }
+
+
+/* User admin table */
+#users {
+    width: 100%;
+}
+
+#users tr:nth-child(even){background-color: #f2f2f2;}
+
+#users tr:hover {background-color: #ddd;}
+
+
+#users th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #3f00fd;
+  color: white;
+}
