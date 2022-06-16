@@ -63,6 +63,9 @@ class ServerUserAdmin():
             return False
         # Success
         return True
+        
+    def delete_user(self, username):
+        del self.users[username]
 
     # Replaces existing user file with new user file
     def save_users (self):
@@ -111,6 +114,9 @@ class ServerUserAdmin():
         if username in self.users.keys() and self.users[username].user_type == "admin":
             return True
         return False
+        
+    def num_users(self):
+        return len(self.users)
 
     def check_username_password (self, username, password):
         # Check username exists
@@ -122,18 +128,40 @@ class ServerUserAdmin():
         # If password fail then return false
         else: 
             return False
+
+    # New user form starts with username - as long as that is unique then 
+    # creates a basic entry and then goes to edit for rest of details
+    def html_new_user (self):
+        html_string = ""
+        # Create form
+        html_string += "<input type=\"hidden\" name=\"newuser\" value=\"newuser\">\n"
+        html_string += "<label for=\"username\">Username:</label>\n"
+        html_string += "<input type=\"text\" id=\"username\" value=\"\"><br />\n"
+        return html_string
+
+    def html_edit_user (self, username):
+        html_string = ""
+        # Check user exists
+        if not username in self.users:
+            return "Invalid user selected\n"
+        # Create form
+        html_string += "<input type=\"hidden\" name=\"currentusername\" value=\"{}\">\n".format(username)
+        html_string += "<label for=\"username\">Username:</label>\n"
+        html_string += "<input type=\"text\" id=\"username\" value=\"{}\">\n".format(username)
+        return html_string
+            
         
     # Returns all users as a html table entries (does not include table / th)
     # Links to useradmin - with action = "delete" or "edit"
     def html_table_all (self):
-        html_text = ""
+        html_string = ""
         for userkey, uservalue in self.users.items():
-            html_text += "<tr><td><a href=\"useradmin?user="+userkey+"&action=edit\">"+userkey+"</a></td>"
-            html_text += "<td>"+uservalue.real_name+"</td>"
-            html_text += "<td>"+uservalue.user_type+"</td>"
-            html_text += "<td>"+uservalue.email+"</td>"
-            html_text += "<td><a href=\"useradmin?user="+userkey+"&action=delete\">X</a></td></tr>\n"
-        return html_text
+            html_string += "<tr><td><a href=\"useradmin?user="+userkey+"&action=edit\">"+userkey+"</a></td>"
+            html_string += "<td>"+uservalue.real_name+"</td>"
+            html_string += "<td>"+uservalue.user_type+"</td>"
+            html_string += "<td>"+uservalue.email+"</td>"
+            html_string += "<td><a href=\"useradmin?user="+userkey+"&action=delete\">X</a></td></tr>\n"
+        return html_string
             
         
 

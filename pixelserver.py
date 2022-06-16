@@ -222,12 +222,17 @@ def useradmin():
             session.pop('username', None)
             return render_template('login.html', message='Admin permissions required')
     # Reach here logged in as an admin user 
+    user_admin = ServerUserAdmin(auth_users_filename)
     
     # status_msg used in case we need to tell the user something
     status_msg = ""
 
     # if it's a post then it's either a new or edit
     if request.method == 'POST':
+        # New user - just has username - creates fields based on blank user
+        if 
+        
+        
         # Here handle saving of user edit
         pass
     else:
@@ -242,33 +247,36 @@ def useradmin():
             # variables beginning with requested have not been validated so only use for comparisons - or perform other security checks
             if requested_action == "edit":
                 # get user edit form
-                # here - user edit form
-                pass
+                user_admin.html_edit_user(requested_user)
+                # here - handle failure
             elif requested_action == "delete":
-                # get verification
-                # here - user delete confirmation
-                pass
+                return render_template('deleteuser.html', user=username)
             # After confirmation of deletion
             elif requested_action == "delete-yes":
-                # get verification
-                # here - delete user
-                pass
+                # check it's a valid user first and that we are not deleting the last user
+                if user_admin.user_exists(requested_user):
+                    if user_admin.num_users() < 2:
+                        return redirect('useradmin?msg=Cannot delete last user')
+                    user_admin.delete_user(requested_user)
+                    user_admin.save_users()
+                    return render_template('useradmin.html')
             else:
                 # invalid request
+                #return render_template('adminuser.html', message="Invalid request")
+                return redirect('useradmin?msg=Invalid request')
 
         # If there is an action on the get, but not user (can only be used for new)
         elif 'action' in request.args.keys() and not 'user' in request.args.keys():
             if request.args.get('action') == "new":
-                # Here new user form
-                pass
+                return render_template('edituser.html', form=user_admin.html_new_user())
             else:
                 # invalid request
+                return redirect('useradmin?msg=Invalid request')
                 
-    # Reach here then sho        
+    # Reach here then show users       
         
 
     # display list of users
-    user_admin = ServerUserAdmin(auth_users_filename)
     user_table = user_admin.html_table_all()
 
     return render_template ('useradmin.html', table=user_table)

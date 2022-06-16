@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Pixel Server</title>
+        <link href="pixels.css" rel="stylesheet" type="text/css" />
+        <script src="jquery.min.js" type="text/javascript"></script>
+        <script src="jquery-ui.min.js"></script>
+        <script src="pixels.js" type="text/javascript"></script>
+        </head>
+
+    <body>
+        <div id="divapplybuttons"><button type="button" id="applybutton" onclick="go_index()">Pixel Server</button>
+        
+        <span id="userlogin">
+        {% if user %}
+            <span id="loggedinuser">{{ user }}</span>
+            {% if admin %}
+                <button type="button" id="settingsbutton" onclick="settings()">Settings</button>
+            {% endif %}
+            <button type="button" id="logoutbutton" onclick="logout()">Logout</button>
+        {% else %}
+            <button type="button" id="loginbutton" onclick="login()">Login</button>
+        {% endif %}
+        
+        </span>
+
+        </div>
+        
+
+        <div id="settings"><h2>User Administration</h2> &gt;&gt; <h2><a href="settings">Pixel Settings</a></h2>
+        
+        <p>{{ message }}</p>
+        
+        <form id="userform" action="useradmin" method="post">
+        
+        {{ form|safe }}
+        
+        <input type="submit" name"submit" value="Save User">
+        
+        </form>
+        
+        </div>
+
+    </body>
+</html>
