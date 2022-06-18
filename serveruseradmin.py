@@ -81,7 +81,8 @@ class ServerUserAdmin():
     # When adding a new user then password is plain text in format that the
     # user added - this performs the conversion to hash
     # returns string - "success", "duplicate" (if username duplicate), "invalid" (eg. if ":" in a field)
-    def add_user (self, username, password_text, real_name, user_type, email, description):
+    # minimum is username and password - rest optional
+    def add_user (self, username, password_text, real_name="", user_type="standard", email="", description=""):
 
         # check it doesn't already exist first (based on username):
         if username in self.users.keys():
@@ -136,18 +137,85 @@ class ServerUserAdmin():
         # Create form
         html_string += "<input type=\"hidden\" name=\"newuser\" value=\"newuser\">\n"
         html_string += "<label for=\"username\">Username:</label>\n"
-        html_string += "<input type=\"text\" id=\"username\" value=\"\"><br />\n"
+        html_string += "<input type=\"text\" id=\"username\" name=\"username\" value=\"\"><br />\n"
         return html_string
+        
+    # Stage 2 of add new user - add password
+    def html_new_user_stage2 (self, username):
+        # Check user doesn't already exist
+        # Should have already checked - but additional check
+        if self.user_exists(username):
+            return ("User already exists")
+        html_string = ""
+        # Create form
+        html_string += "<input type=\"hidden\" name=\"newuser\" value=\"userpassword\">\n"
+        html_string += "<label for=\"username\">Username:</label>\n"
+        html_string += "<input type=\"text\" id=\"username\" name=\"username\" value=\"{}\" readonly><br />\n".format(username)
+        html_string += "<label for=\"password\">Password:</label>\n"
+        html_string += "<input type=\"password\" id=\"password\" name=\"password\" value=\"\"><br />\n"
+        html_string += "<label for=\"password2\">Repeat password:</label>\n"
+        html_string += "<input type=\"password\" id=\"password2\" name=\"password2\" value=\"\"><br />\n"
+
+        return html_string
+        
+    # Add any specific rules (eg. special char / capitals)
+    # Minimum length = 8, minimum 1 alpha & 1 number
+    # No need to try and strip any chars as the password
+    # will be hashed
+    def validate_password (self, password):
+        if len(password) < 8:
+            return (False, "Password must be at least 8 characters long")
+        if self.has_digit(password) and self.has_alpha(password):
+            return (True, "")
+        else:
+            return (False, "Password must contain at least one letter and one digit")
+            
+            
+    def has_digit (self, string):
+        for i in list(string):
+            if i.isdigit():
+                return True
+        return False
+
+    def has_alpha (self, string):
+        for i in list(string):
+            if i.isalpha():
+                return True
+        return False
+
+    # Checks to see if user is valid (min 6 chars - alphanumeric)
+    def validate_user (self, username):
+        if len(username) < 6: 
+            return (False, "Username must be minimum of 6 characters")
+        if username.isalnum():
+            return (True, "")
+        else:
+            return (False, "Username must be letters and digits only")
 
     def html_edit_user (self, username):
         html_string = ""
         # Check user exists
         if not username in self.users:
             return "Invalid user selected\n"
+        this_user = self.users[username]
         # Create form
-        html_string += "<input type=\"hidden\" name=\"currentusername\" value=\"{}\">\n".format(username)
+        html_string += "<input type=\"hidden\" name=\"edituser\" value=\"edituser\">\n"
+        html_string += "<input type=\"hidden\" name=\"currentusername\" value=\"{}\">\n".format(this_user.username)
         html_string += "<label for=\"username\">Username:</label>\n"
-        html_string += "<input type=\"text\" id=\"username\" value=\"{}\">\n".format(username)
+        html_string += "<input type=\"text\" id=\"username\" name=\"username\" value=\"{}\"><br />\n".format(this_user.username)
+        # Does not change password - that has to be done separately
+        html_string += "<label for=\"realname\">Name:</label>\n"
+        html_string += "<input type=\"text\" id=\"realname\" name=\"realname\" value=\"{}\"><br />\n".format(this_user.real_name)
+        # Admin checkbox = user_type
+        html_string += "<label for=\"admin\">Admin:</label>\n"
+        if (this_user.user_type == "admin"):
+            html_string += "<input type=\"checkbox\" name=\"admin\" checked=\"checked\"><br />\n"
+        else:
+            html_string += "<input type=\"checkbox\" name=\"admin\"><br />\n"
+        html_string += "<label for=\"email\">Email:</label>\n"
+        html_string += "<input type=\"text\" id=\"email\" name=\"email\" value=\"{}\"><br />\n".format(this_user.email)
+        html_string += "<label for=\"description\">Description:</label>\n"
+        html_string += "<input type=\"text\" id=\"description\" name=\"description\" value=\"{}\"><br />\n".format(this_user.description)
         return html_string
             
         

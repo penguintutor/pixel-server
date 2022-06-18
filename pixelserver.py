@@ -165,8 +165,8 @@ def settings():
                 status_msg = temp_value
                 #print (status_msg)
                 break
-            # Save this for updating values - use returned value in 
-            # case it's been sanitised
+            # Save this for updating values - use returned value
+            # in case it's been sanitised (only certain types are)
             update_dict[key] = temp_value
             #print ("Dict updated with {} Value {}".format(key, temp_value))
             
@@ -230,9 +230,55 @@ def useradmin():
     # if it's a post then it's either a new or edit
     if request.method == 'POST':
         # New user - just has username - creates fields based on blank user
-        if 
-        
-        
+        if 'newuser' in request.form:
+            
+            # check there is a username
+            if 'username' in request.form:
+                # Check user doesn't already exist
+                requested_username = request.form['username']
+                # check for minimum chars and only alphanumeric
+                check_user = user_admin.validate_user(requested_username)
+            else:
+                check_user = (False, "Missing username or username is blank")
+            if check_user[0] == False:
+                return render_template('edituser.html', form=user_admin.html_new_user(), message=check_user[1])
+            if user_admin.user_exists (requested_username):
+                return render_template('edituser.html', form=user_admin.html_new_user(), message="User already exists, please try another username")
+            else:
+                # could be stage 1 (just username) or stage 2 (with password)
+                # stage 1
+                if request.form['newuser']=="newuser" :
+                    # Create form with just username and password (then edit full details later)
+                    edit_form = user_admin.html_new_user_stage2(requested_username)
+                    return render_template('edituser.html', form=edit_form)
+                # New user stage 2 - adds password
+                elif request.form['newuser']=="userpassword":
+                    # Already checked user so check password
+                    # Check password and repeat are the same
+                    # Use try except in case missing field or similar
+                    try:
+                        if request.form['password'] == request.form['password2']:
+                            # ignore password2 as it's identical to password
+                            requested_password = request.form['password']
+                            check_password = user_admin.validate_password(requested_password)
+                        else: 
+                            # Ideally catch this using JavaScript first, but don't rely on javascript
+                            check_password = (False, "Passwords do not match")
+                    except:
+                        check_password [False, "Invalid passwords"]
+                    # If check password is false then invalid - retry password entry
+                    if (check_password[0] == False):
+                        edit_form = user_admin.html_new_user_stage2(requested_username)
+                        return render_template('edituser.html', form=edit_form, message=check_password[1])
+                    # save username and password (rest of fields empty)
+                    user_admin.add_user(requested_username, requested_password)
+                    user_admin.save_users()
+                    # Now load user in edit mode
+                    edit_form = user_admin.html_edit_user (requested_username)
+                    return render_template('edituser.html', form=edit_form)
+                        
+                        
+            
         # Here handle saving of user edit
         pass
     else:
