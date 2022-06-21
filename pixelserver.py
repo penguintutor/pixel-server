@@ -203,6 +203,7 @@ def settings():
 
 @app.route("/useradmin", methods=['GET', 'POST'])
 def useradmin():
+    global pixel_conf
     ip_address = get_ip_address()
     # Authentication first
     login_status = auth_check(ip_address)
@@ -222,7 +223,7 @@ def useradmin():
             session.pop('username', None)
             return render_template('login.html', message='Admin permissions required')
     # Reach here logged in as an admin user 
-    user_admin = ServerUserAdmin(auth_users_filename)
+    user_admin = ServerUserAdmin(auth_users_filename, pixel_conf.get_value('algorithm'))
     
     # status_msg used in case we need to tell the user something
     status_msg = ""
@@ -277,10 +278,22 @@ def useradmin():
                     edit_form = user_admin.html_edit_user (requested_username)
                     return render_template('edituser.html', form=edit_form)
                         
-                        
+        # Save changes                
+        if 'edituser' in request.form:
+            # check the user exists
+            try:
+                current_user = request.form['currentuser']
+                if not user_admin.user_exists(current_user):
+                    return redirect('useradmin?msg=Invalid update request')
+            except:
+                return redirect('useradmin?msg=Invalid update request')
+            # current_user exists
+            ## validate each value and save in temporary dictionary
+            new_values = {}
             
-        # Here handle saving of user edit
-        pass
+            
+        else:
+            return redirect('useradmin?msg=Invalid update request')
     else:
         pass 
         # here add error message

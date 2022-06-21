@@ -12,11 +12,11 @@ from serveruser import ServerUser
 # Designed for small number of users in a typical IOT system
 # For servers with lots of users then replace this with database driven version
 # Returns True for success - False if there is a problem (eg. file not exist)
-# Algorithm is used for adding new users only - currently support "argon2" or "sha256" - argon2 is much more secure but takes longer
+# Algorithm is used for adding new users only - currently support "Argon2" or "SHA256" - Argon2 is much more secure but takes longer
 # may be too slow for some systems
 class ServerUserAdmin():
 
-    def __init__ (self, usersfile, algorithm="argon2"):
+    def __init__ (self, usersfile, algorithm="Argon2"):
         self.filename = usersfile
         # List of users on system - Entries in this list should not be updated directly
         # instead update within this class so that it saves any changes

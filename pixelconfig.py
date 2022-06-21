@@ -23,6 +23,8 @@ class PixelConfig():
         
     }
     
+    algorithm_types = ['Argon2', 'SHA256']
+    
     # What configs options can be set
     # Min and max are just general check mainly for numbers
     # number = int ; float = floating point
@@ -42,7 +44,8 @@ class PixelConfig():
         'ledmaxbrightness': ["Brightness", "number", 0, 255, "0 to 255"],
         'ledinvert' : ['Invert LED?', "bool", "", "", "True or False"],
         'ledchannel' : ["LED Channel", "number", 0, 10, "Normally 0"],
-        'striptype' : ["LED Strip", "dictionary-keys", strip_types, "radio", "Strip type"]
+        'striptype' : ["LED Strip", "dictionary-keys", strip_types, "radio", "Strip type"],
+        'algorithm' : ["Hash algorithm", "list", algorithm_types, "radio", "SHA256 (faster) or Argon2 (more secure)"]
     }
     
     def __init__ (self, default_config, custom_config, light_config):
@@ -144,7 +147,14 @@ class PixelConfig():
                                 self.errormsg = "Invalid dictionary for {} value {}".format(key, value)
                                 print (self.errormsg)
                                 return -2 
-                        ## List not yet implemented
+                        ## List
+                        elif (this_setting[1] == "list"):
+                            if value in this_setting[2]:
+                                self.settings[key] = value
+                            else:
+                                self.errormsg = "Invalid list value for {} value {}".format(key, value)
+                                print (self.errormsg)
+                                return -2 
 
                     else:
                         self.errormsg = "Unknown entry "+key+" in "+filename
@@ -162,6 +172,9 @@ class PixelConfig():
             return -1
             
         return 1
+
+    def get_value (self, key):
+       return self.settings[key] 
 
 
     # Returns tuple (status, value / message)

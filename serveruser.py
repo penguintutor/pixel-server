@@ -3,7 +3,7 @@ import hashlib
 import uuid
 
 class ServerUser ():
-
+                                                   
     # init with all details
     def __init__ (self, username, password_hash, real_name, user_type, email, description):
         self.username = username
@@ -19,9 +19,8 @@ class ServerUser ():
 	
     # Checks plaintext password against stored password hash
     def check_password (self, password):
-        # check for $5$ = sha256
+        # check for $5$ = SHA256
         if self.password_hash[0:3] == "$5$":
-            print ("SHA 256")
             salt, just_hash = self.password_hash[3:].split('$')
             hashed_given_password = hashlib.sha256(salt.encode() + password.encode()).hexdigest()
             return hashed_given_password == just_hash
@@ -45,9 +44,9 @@ class ServerUser ():
     # uses argon2 which is a strong hash, but takes approx 8 seconds 
     # on a Pi Zero - or sha256 which is faster, particularly on Pi Zero
     @staticmethod
-    def hash_password (password, algorithm="argon2"):
+    def hash_password (password, algorithm="Argon2"):
         #password_bytes = bytes(password, 'utf-8')
-        if algorithm == "sha256":
+        if algorithm == "SHA256":
             salt = uuid.uuid4().hex
             return "$5$" + salt + "$" + hashlib.sha256(salt.encode() + password.encode()).hexdigest()
         else:
