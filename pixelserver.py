@@ -5,6 +5,7 @@ from flask import request
 from flask import render_template
 from flask import session
 from flask import redirect
+from flask import Markup
 from rpi_ws281x import *
 import threading
 import logging, os
@@ -282,16 +283,25 @@ def useradmin():
         if 'edituser' in request.form:
             # check the user exists
             try:
-                current_user = request.form['currentuser']
+                current_user = request.form['currentusername']
                 if not user_admin.user_exists(current_user):
                     return redirect('useradmin?msg=Invalid update request')
             except:
                 return redirect('useradmin?msg=Invalid update request')
             # current_user exists
             ## validate each value and save in temporary dictionary
-            new_values = {}
+            new_values = parse_form (request.form)
             
-            
+            if 'error' in new_values.keys():
+                return redirect('useradmin?msg='+new_values['error'])
+                
+            # If username in validated form data (then change username)
+            # First check username won't be duplicate
+            if 'username' in new_values and user_admin.user_exists(new_values['username']):
+                return render_template('edituser.html', form=user_admin.html_new_user(), message="User already exists")
+                
+            ###Here - update via serveruseradmin
+
         else:
             return redirect('useradmin?msg=Invalid update request')
     else:
@@ -306,8 +316,8 @@ def useradmin():
             # variables beginning with requested have not been validated so only use for comparisons - or perform other security checks
             if requested_action == "edit":
                 # get user edit form
-                user_admin.html_edit_user(requested_user)
-                # here - handle failure
+                html_form = user_admin.html_edit_user(requested_user)
+                return render_template('edituser.html', form=html_form)
             elif requested_action == "delete":
                 return render_template('deleteuser.html', user=username)
             # After confirmation of deletion
@@ -321,7 +331,6 @@ def useradmin():
                     return render_template('useradmin.html')
             else:
                 # invalid request
-                #return render_template('adminuser.html', message="Invalid request")
                 return redirect('useradmin?msg=Invalid request')
 
         # If there is an action on the get, but not user (can only be used for new)
@@ -495,6 +504,65 @@ def get_ip_address():
     if 'CLIENT_ADDRESS' in request.headers:
         ip_address = request.headers.get('CLIENT_ADDRESS')
     return ip_address
+    
+    
+    
+# Also converts to the format used by ServerUser 
+# eg. real_name instead of realname which is used in form
+# Any errors return with error dict instead
+def parse_form (form_data):
+    data_dict = {}
+    
+    # Check for change in username, only add to dict if different to currentusername
+    # Does not check that the new username is not duplicate - check that later
+    if 'currentusername' in form_data.keys() and 'username' in form_data.keys():
+        if form_data['currentusername'] != form_data['username']:
+            # check that the new username is not blank
+            if strip(form_data['username']) == "":
+                return {'error': "Username cannot be blank"}
+            # only allow alphanumeric
+            check_user = user_admin.validate_user(requested_username)
+            if check_user[0] != True:
+                return {"error": check_user[1]}
+            # is valid so update dict
+            data_dict['username'] = form_data['username']
+            
+                
+    
+    if 'realname' in form_data.keys():
+        # reject if a colon (potential attack)
+        if ':' in form_data['realname']:
+            return {'error': "Invalid character in name"}
+        # strip any tags
+        data_dict['real_name'] = Markup(form_data['realname']).striptags()
+        
+    # Admin is used to set usertype
+    # convert at this stage to usertype
+    if 'admin' in form_data.keys():
+        if form_data['admin'] == True:
+            data_dict['user_type'] = "admin"
+    # If not in form then it's false
+    else:
+        data_dict['user_type'] = "standard"
+            
+    if 'email' in form_data.keys():
+        # Does not validate it's actually an email string
+        # just check for not allowed tags
+        # strip : and html tags
+        if ':' in form_data['email']:
+            return {'error': "Invalid character in email address"}
+        # strip any tags
+        data_dict['email'] = Markup(form_data['email']).striptags()
+
+    if 'description' in form_data.keys():
+        # strip : and html tags
+        if ':' in form_data['description']:
+            return {'error': "Invalid character in description"}
+        # strip any tags
+        data_dict['description'] = Markup(form_data['description']).striptags()
+        
+    return data_dict
+
 
 if __name__ == "__main__":
     # run as two threads - main thread and flask thread

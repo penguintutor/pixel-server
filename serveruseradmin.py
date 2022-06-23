@@ -132,6 +132,7 @@ class ServerUserAdmin():
         # If password fail then return false
         else: 
             return False
+        
 
     # New user form starts with username - as long as that is unique then 
     # creates a basic entry and then goes to edit for rest of details
