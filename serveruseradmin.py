@@ -28,6 +28,12 @@ class ServerUserAdmin():
             self.file_loaded = True
         self.algorithm = algorithm
         
+    # Calls load users, but clears out any current users
+    # Usually used in case that an error ocurred updating entry
+    # and so risk of corrupted users
+    def reload_users (self):
+        self.users.clear()
+        self.load_users()
 
     def load_users (self):
         try:
@@ -119,8 +125,57 @@ class ServerUserAdmin():
             return True
         return False
         
+    def get_real_name (self, username):
+        return self.users[username].real_name
+        
     def num_users(self):
         return len(self.users)
+        
+    # Update the user
+    # Don't forget to save after calling this if required
+    def update_user (self, current_username, new_values):
+        # Always use new_username for updates - and update if required
+        new_username = current_username
+        if 'username' in new_values.keys() and new_values['username'] != current_username:
+            new_username = new_values['username'].strip()
+            # Validate username - check not duplicate and only alpha numeric
+            # Does not check other rules
+            if new_username in self.users.keys() or not new_username.isalnum():
+                print ("Reject username")
+                return False
+            # First update the username inside the existing entry 
+            self.users[current_username].username = new_username
+            # pop existing entry into one with new name
+            # Note will move user to the end - won't maintain dictionary order
+            self.users[new_username] = self.users.pop(current_username)
+        # If username changed then any other changes apply to the new user
+        if 'real_name' in new_values.keys():
+            # check no : or <> character
+            if ':' in new_values['real_name'] or '<' in new_values['real_name'] or '>' in new_values['real_name']: 
+                return False
+            self.users[new_username].real_name = new_values['real_name']
+            
+        # only allow standard or admin
+        if 'user_type' in new_values.keys():
+            if new_values['user_type'] == "admin":
+                self.users[new_username].user_type = "admin"
+            elif new_values['user_type'] == "standard":
+                self.users[new_username].user_type = "standard"
+
+        if 'email' in new_values.keys():
+            # check no : or <> character
+            if ':' in new_values['email'] or '<' in new_values['email'] or '>' in new_values['email']: 
+                return False
+            self.users[new_username].email = new_values['email']
+
+        if 'description' in new_values.keys():
+            # check no : or <> character
+            if ':' in new_values['description'] or '<' in new_values['description'] or '>' in new_values['description']: 
+                return False
+            self.users[new_username].description = new_values['description']
+
+        return True
+        
 
     def check_username_password (self, username, password):
         # Check username exists
@@ -232,6 +287,7 @@ class ServerUserAdmin():
             html_string += "<td>"+uservalue.real_name+"</td>"
             html_string += "<td>"+uservalue.user_type+"</td>"
             html_string += "<td>"+uservalue.email+"</td>"
+            html_string += "<td>"+uservalue.description+"</td>"
             html_string += "<td><a href=\"useradmin?user="+userkey+"&action=delete\">X</a></td></tr>\n"
         return html_string
             

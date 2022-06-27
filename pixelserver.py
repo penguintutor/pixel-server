@@ -290,7 +290,7 @@ def useradmin():
                 return redirect('useradmin?msg=Invalid update request')
             # current_user exists
             ## validate each value and save in temporary dictionary
-            new_values = parse_form (request.form)
+            new_values = parse_form (user_admin, request.form)
             
             if 'error' in new_values.keys():
                 return redirect('useradmin?msg='+new_values['error'])
@@ -300,11 +300,23 @@ def useradmin():
             if 'username' in new_values and user_admin.user_exists(new_values['username']):
                 return render_template('edituser.html', form=user_admin.html_new_user(), message="User already exists")
                 
-            ###Here - update via serveruseradmin
-
+            # Update all values 
+            result = user_admin.update_user (current_user, new_values)
+            # save 
+            if result == True:
+                user_admin.save_users()
+                # redirect to main page
+                return redirect('useradmin?msg=User updated')
+            # if not then error - so reload original config
+            else:
+                user_admin.reload_users()
+                # Gives unknown error - but should really be caught already
+                return redirect('useradmin?msg=Unknown error')
+            
         else:
             return redirect('useradmin?msg=Invalid update request')
     else:
+        #Here add handling of password
         pass 
         # here add error message
 
@@ -384,7 +396,8 @@ def seqJSON ():
 def setSeq():
     global seq_set, upd_time, on_status
     # Authentication first
-    login_status = auth_check()
+    ip_address = get_ip_address()
+    login_status = auth_check(ip_address)
     # not allowed even if logged in
     if login_status == "invalid":
         return render_template('invalid.html')
@@ -510,7 +523,7 @@ def get_ip_address():
 # Also converts to the format used by ServerUser 
 # eg. real_name instead of realname which is used in form
 # Any errors return with error dict instead
-def parse_form (form_data):
+def parse_form (user_admin, form_data):
     data_dict = {}
     
     # Check for change in username, only add to dict if different to currentusername
@@ -518,7 +531,8 @@ def parse_form (form_data):
     if 'currentusername' in form_data.keys() and 'username' in form_data.keys():
         if form_data['currentusername'] != form_data['username']:
             # check that the new username is not blank
-            if strip(form_data['username']) == "":
+            requested_username = form_data['username'].strip()
+            if requested_username == "":
                 return {'error': "Username cannot be blank"}
             # only allow alphanumeric
             check_user = user_admin.validate_user(requested_username)
@@ -539,8 +553,8 @@ def parse_form (form_data):
     # Admin is used to set usertype
     # convert at this stage to usertype
     if 'admin' in form_data.keys():
-        if form_data['admin'] == True:
-            data_dict['user_type'] = "admin"
+        #if form_data['admin'] == True:
+        data_dict['user_type'] = "admin"
     # If not in form then it's false
     else:
         data_dict['user_type'] = "standard"

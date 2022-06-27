@@ -106,3 +106,42 @@ def test_duplicate_user():
         "normal", "email@test.com",
         "This should not be a success")
     assert result == "duplicate"
+
+
+# Test successful change of username
+def test_username_change():
+    user_admin = ServerUserAdmin(_user_filename)
+    result = user_admin.add_user(
+        "oldusername", "pa'#swo!d123", 
+        "My name",
+        "normal", "",
+        "")
+    assert result == "success"
+    assert user_admin.user_exists("oldusername")
+    # change username here
+    result = user_admin.update_user("oldusername", {"username":"newusername"})
+    assert result == True
+    assert not user_admin.user_exists("oldusername")
+    assert user_admin.user_exists("newusername")
+    # Also check full name to make sure it's the original entry
+    assert user_admin.get_real_name("newusername") == "My name"
+    
+    
+
+# Test changing username after creation - doesn't allow colon
+def test_username_change_colon():
+    user_admin = ServerUserAdmin(_user_filename)
+    result = user_admin.add_user(
+        "olduser01", ":a'#s:o!d123", 
+        "My name",
+        "normal", "",
+        "")
+    assert result == "success"
+    assert user_admin.user_exists("olduser01")
+    # change username here
+    result = user_admin.update_user("oldusername", {"username":"new:username"})
+    assert result == False
+    assert user_admin.user_exists("olduser01")
+    assert not user_admin.user_exists("new:username")
+    # Also check full name to make sure it's the original entry
+    assert user_admin.get_real_name("olduser01") == "My name"
