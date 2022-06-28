@@ -28,15 +28,17 @@
         </div>
         
 
-        <div id="settings"><h2>User Administration</h2> &gt;&gt; <h2><a href="settings">Pixel Settings</a></h2>
+        <div id="settings-tabs"><a href="settings" class="tab-item">Pixel Settings</a> <a href="useradmin" class="tab-item-selected">User Administration</a>
+        </div>
+        <div id="settings">
         
-        <h2>Delete User - {{ user }}</h2>
+        <h2>Delete User - {{ deluser }}</h2>
         
         <p>{{ message }}</p>
         
-        <p>Confirm - delete user {{ user }}</p>
+        <p>Confirm - delete user {{ deluser }}</p>
         
-        <p><a href="useradmin?action=delete-yes&user={{ user }}">Yes</a> <a href="useradmin">No</a></p>
+        <p><a href="useradmin?action=delete-yes&user={{ deluser }}">Yes</a> <a href="useradmin">No</a></p>
         
         
         </div>

@@ -243,16 +243,17 @@ def useradmin():
             else:
                 check_user = (False, "Missing username or username is blank")
             if check_user[0] == False:
-                return render_template('edituser.html', form=user_admin.html_new_user(), message=check_user[1])
+                return render_template('edituser.html', user=username, admin=True, form=user_admin.html_new_user(), message=check_user[1])
+                
             if user_admin.user_exists (requested_username):
-                return render_template('edituser.html', form=user_admin.html_new_user(), message="User already exists, please try another username")
+                return render_template('edituser.html', user=username, admin=True, form=user_admin.html_new_user(), message="User already exists, please try another username")
             else:
                 # could be stage 1 (just username) or stage 2 (with password)
                 # stage 1
                 if request.form['newuser']=="newuser" :
                     # Create form with just username and password (then edit full details later)
                     edit_form = user_admin.html_new_user_stage2(requested_username)
-                    return render_template('edituser.html', form=edit_form)
+                    return render_template('edituser.html',  user=username, admin=True, form=edit_form)
                 # New user stage 2 - adds password
                 elif request.form['newuser']=="userpassword":
                     # Already checked user so check password
@@ -271,13 +272,13 @@ def useradmin():
                     # If check password is false then invalid - retry password entry
                     if (check_password[0] == False):
                         edit_form = user_admin.html_new_user_stage2(requested_username)
-                        return render_template('edituser.html', form=edit_form, message=check_password[1])
+                        return render_template('edituser.html', user=username, admin=True, form=edit_form, message=check_password[1])
                     # save username and password (rest of fields empty)
                     user_admin.add_user(requested_username, requested_password)
                     user_admin.save_users()
                     # Now load user in edit mode
                     edit_form = user_admin.html_edit_user (requested_username)
-                    return render_template('edituser.html', form=edit_form)
+                    return render_template('edituser.html', user=username, admin=True, form=edit_form)
                         
         # Save changes                
         if 'edituser' in request.form:
@@ -298,7 +299,7 @@ def useradmin():
             # If username in validated form data (then change username)
             # First check username won't be duplicate
             if 'username' in new_values and user_admin.user_exists(new_values['username']):
-                return render_template('edituser.html', form=user_admin.html_new_user(), message="User already exists")
+                return render_template('edituser.html', user=username, admin=True, form=user_admin.html_new_user(), message="User already exists")
                 
             # Update all values 
             result = user_admin.update_user (current_user, new_values)
@@ -329,9 +330,12 @@ def useradmin():
             if requested_action == "edit":
                 # get user edit form
                 html_form = user_admin.html_edit_user(requested_user)
-                return render_template('edituser.html', form=html_form)
+                return render_template('edituser.html', user=username, admin=True, form=html_form)
             elif requested_action == "delete":
-                return render_template('deleteuser.html', user=username)
+                # check requested_user exists
+                if not user_admin.user_exists(requested_user):
+                    return redirect('useradmin?msg=Invalid user')
+                return render_template('deleteuser.html', user=username, admin=True, deluser=requested_user)
             # After confirmation of deletion
             elif requested_action == "delete-yes":
                 # check it's a valid user first and that we are not deleting the last user
@@ -340,7 +344,8 @@ def useradmin():
                         return redirect('useradmin?msg=Cannot delete last user')
                     user_admin.delete_user(requested_user)
                     user_admin.save_users()
-                    return render_template('useradmin.html')
+                    user_table = user_admin.html_table_all()
+                    return render_template ('useradmin.html', user=username, admin=True, table=user_table)
             else:
                 # invalid request
                 return redirect('useradmin?msg=Invalid request')
@@ -348,7 +353,7 @@ def useradmin():
         # If there is an action on the get, but not user (can only be used for new)
         elif 'action' in request.args.keys() and not 'user' in request.args.keys():
             if request.args.get('action') == "new":
-                return render_template('edituser.html', form=user_admin.html_new_user())
+                return render_template('edituser.html', user=username, admin=True, form=user_admin.html_new_user())
             else:
                 # invalid request
                 return redirect('useradmin?msg=Invalid request')
@@ -359,7 +364,7 @@ def useradmin():
     # display list of users
     user_table = user_admin.html_table_all()
 
-    return render_template ('useradmin.html', table=user_table)
+    return render_template ('useradmin.html', user=username, admin=True, table=user_table)
         
 
 ## No authentication required for generic files
