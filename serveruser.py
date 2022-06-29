@@ -58,7 +58,7 @@ class ServerUser ():
     
     # This is recommended way to set password
     def set_password (self, new_password, algorithm="Argon2"):
-        self.password_hash = hash_password (new_password, algorithm)
+        self.password_hash = ServerUser.hash_password (new_password, algorithm)
             
     @property
     def real_name(self):

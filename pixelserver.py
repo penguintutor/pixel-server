@@ -200,7 +200,81 @@ def settings():
     return render_template('settings.html', user=username, admin=True, form=settingsform, message=status_msg)
 
 
+# profile - can view own profile and change password etc
+@app.route("/profile", methods=['GET', 'POST'])
+def profile():
+    global pixel_conf
+    ip_address = get_ip_address()
+    # Status msg for feedback to user
+    status_msg = ""
+    # Authentication first
+    login_status = auth_check(ip_address)
+    # not allowed even if logged in
+    if login_status == "invalid":
+        return redirect('/invalid')
+    # Network approval not sufficient for profile - must be logged in
+    # If not approved then issue login page
+    if not (login_status == "logged_in") :
+        return redirect('/login')
+    # Reach here then this is logged in
+    username = session['username']
+    #get any messages
+    status_msg = ""
+    if 'msg' in request.args.keys():
+        status_msg = request.args['msg']
+        # Todo - validate
+    # Create user_admin object as needed shortly
+    user_admin = ServerUserAdmin(auth_users_filename, pixel_conf.get_value('algorithm'))
+    # get admin to determine if settings menu is displayed
+    is_admin = auth.check_admin(username)
+    profile_form = user_admin.html_view_profile(username)
+    return render_template('profile.html', user=username, admin=is_admin, form=profile_form, message=status_msg)
 
+@app.route("/password", methods=['GET', 'POST'])
+def password():
+    global pixel_conf
+    ip_address = get_ip_address()
+    # Status msg for feedback to user
+    status_msg = ""
+    # Authentication first
+    login_status = auth_check(ip_address)
+    # not allowed even if logged in
+    if login_status == "invalid":
+        return redirect('/invalid')
+    # Network approval not sufficient for profile - must be logged in
+    # If not approved then issue login page
+    if not (login_status == "logged_in") :
+        return redirect('/login')
+    # Reach here then this is logged in
+    username = session['username']
+    # logged in and have username so allow to change password
+    user_admin = ServerUserAdmin(auth_users_filename, pixel_conf.get_value('algorithm'))
+    # Is user admin - check for top menu only doesn't change what can be done here
+    is_admin = auth.check_admin(username)
+    password_form = user_admin.html_change_password()
+    if request.method == 'POST':
+        # first check existing password
+        if (not 'currentpassword' in request.form):
+            return render_template('password.html', user=username, admin=is_admin, form=password_form, message="Invalid request")
+        if (not user_admin.check_username_password(username, request.form['currentpassword'])):
+            return render_template('password.html', user=username, admin=is_admin, form=password_form, message="Incorrect username / password")
+        # Now check that repeat is same
+        if (not 'newpassword' in request.form) or (not 'repeatpassword' in request.form) or request.form['newpassword'] != request.form['repeatpassword']:
+            return render_template('password.html', user=username, admin=is_admin, form=password_form, message="New passwords do not match")
+        new_password = request.form['newpassword']
+        # check password is valid (meets rules)
+        result = user_admin.validate_password(new_password)
+        if result[0] != True:
+            return render_template('password.html', user=username, admin=is_admin, form=password_form, message=result[1])
+        # passed tests so set new password
+        user_admin.change_password(username, new_password)
+        user_admin.save_users()
+        # redirects to profile
+        return redirect('profile?msg=Password changed')
+        
+    else:
+        return render_template('password.html', user=username, admin=is_admin, form=password_form)
+    
 
 @app.route("/useradmin", methods=['GET', 'POST'])
 def useradmin():

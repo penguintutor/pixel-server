@@ -115,6 +115,10 @@ class ServerUserAdmin():
         return "success"
 
 
+    def change_password (self, username, new_password):
+        self.users[username].set_password(new_password, self.algorithm)
+        return True
+
     def user_exists (self, username):
         if username in self.users.keys():
             return True
@@ -276,7 +280,49 @@ class ServerUserAdmin():
         html_string += "<label for=\"description\">Description:</label>\n"
         html_string += "<input type=\"text\" id=\"description\" name=\"description\" value=\"{}\"><br />\n".format(this_user.description)
         return html_string
-            
+
+
+    # Creates a form, but all fields are read only
+    def html_view_profile (self, username):
+        html_string = ""
+        # Check user exists
+        if not username in self.users:
+            return "Invalid user selected\n"
+        this_user = self.users[username]
+        # Create form
+        html_string += "<input type=\"hidden\" name=\"viewprofile\" value=\"viewprofile\">\n"
+        html_string += "<input type=\"hidden\" name=\"currentusername\" value=\"{}\">\n".format(this_user.username)
+        html_string += "<label for=\"username\">Username:</label>\n"
+        html_string += "<input type=\"text\" id=\"username\" name=\"username\" value=\"{}\" readonly><br />\n".format(this_user.username)
+        # Does not change password - that has to be done separately
+        html_string += "<label for=\"realname\">Name:</label>\n"
+        html_string += "<input type=\"text\" id=\"realname\" name=\"realname\" value=\"{}\" readonly><br />\n".format(this_user.real_name)
+        # Admin checkbox = user_type
+        html_string += "<label for=\"admin\">Admin:</label>\n"
+        if (this_user.user_type == "admin"):
+            html_string += "<input type=\"checkbox\" name=\"admin\" checked=\"checked\" readonly><br />\n"
+        else:
+            html_string += "<input type=\"checkbox\" name=\"admin\" readonly><br />\n"
+        html_string += "<label for=\"email\">Email:</label>\n"
+        html_string += "<input type=\"text\" id=\"email\" name=\"email\" value=\"{}\" readonly><br />\n".format(this_user.email)
+        html_string += "<label for=\"description\">Description:</label>\n"
+        html_string += "<input type=\"text\" id=\"description\" name=\"description\" value=\"{}\" readonly><br />\n".format(this_user.description)
+        return html_string
+
+
+
+    def html_change_password (self):
+        html_string = ""
+        # Create form
+        html_string += "<input type=\"hidden\" name=\"passwordchange\" value=\"passwordchange\">\n"
+        html_string += "<label for=\"currentpassword\">Current Password:</label>\n"
+        html_string += "<input type=\"password\" id=\"currentpassword\" name=\"currentpassword\" value=\"\"><br />\n"
+        html_string += "<label for=\"newpassword\">New Password:</label>\n"
+        html_string += "<input type=\"password\" id=\"newpassword\" name=\"newpassword\" value=\"\"><br />\n"
+        html_string += "<label for=\"repeatpassword\">Repeat Password:</label>\n"
+        html_string += "<input type=\"password\" id=\"repeatpassword\" name=\"repeatpassword\" value=\"\"><br />\n"
+        return html_string
+
         
     # Returns all users as a html table entries (does not include table / th)
     # Links to useradmin - with action = "delete" or "edit"

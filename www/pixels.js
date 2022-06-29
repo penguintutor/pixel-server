@@ -174,6 +174,11 @@ function settings() {
     window.location.href="settings";
 }
 
+// redirect to profile page
+function profile() {
+    window.location.href="profile";
+}
+
 // Redirect to login
 function login() {
     window.location.href="login";

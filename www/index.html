@@ -14,7 +14,7 @@
         
         <span id="userlogin">
         {% if user %}
-            <span id="loggedinuser">{{ user }}</span>
+            <button type="button" id="profilebutton" onclick="profile()">{{ user }}</button>
             {% if admin %}
                 <button type="button" id="settingsbutton" onclick="settings()">Settings</button>
             {% endif %}

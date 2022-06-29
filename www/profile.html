@@ -28,28 +28,19 @@
         </div>
         
 
-        <div id="settings-tabs"><a href="settings" class="tab-item">Pixel Settings</a> <a href="useradmin" class="tab-item-selected">User Administration</a>
+        <div id="settings-tabs"><a href="profile" class="tab-item-selected">Profile</a> <a href="password" class="tab-item">Change Password</a>
         </div>
         <div id="settings">
         
         <p>{{ message }}</p>
         
-        <table id="users">
-        <tr>
-            <th>Username</th>
-            <th>Real Name</th>
-            <th>User Type</th>
-            <th>Email</th>
-            <th>Description</th>
-            <th>Delete?</th>
-        </tr>
+        <p>The following items are readonly. Please contact an admin for any changes.</p>
         
-        {{ table|safe }}
+        <form id="userform" action="profile" method="post">
         
+        {{ form|safe }}
         
-        </table>
-        
-        <a href="useradmin?action=new">Add New User</a>
+        <!--<input type="submit" name"submit" value="Save User">-->
         
         </form>
         

@@ -74,7 +74,7 @@ ul ul ul { margin: 0;}
     height: 75px;
 }
 
-#loginbutton {
+#loginbutton, #logoutbutton, #profilebutton {
     background-color: #ffffff;
     border: none;
     padding: 15px;
@@ -86,8 +86,8 @@ ul ul ul { margin: 0;}
     height: 75px;
 }
 
-#logoutbutton {
-    background-color: #ffffff;
+#profilebutton {
+    background-color: #8888ff;
     border: none;
     padding: 15px;
     text-align: center;
@@ -97,7 +97,6 @@ ul ul ul { margin: 0;}
     width:  150px;
     height: 75px;
 }
-
 
 #reversebutton {
     border: none;
