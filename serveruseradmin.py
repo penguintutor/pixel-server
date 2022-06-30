@@ -334,7 +334,7 @@ class ServerUserAdmin():
             html_string += "<td>"+uservalue.user_type+"</td>"
             html_string += "<td>"+uservalue.email+"</td>"
             html_string += "<td>"+uservalue.description+"</td>"
-            html_string += "<td><a href=\"useradmin?user="+userkey+"&action=delete\">X</a></td></tr>\n"
+            html_string += "<td><a href=\"deluser?user="+userkey+"&action=delete\">X</a></td></tr>\n"
         return html_string
             
         

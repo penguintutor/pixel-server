@@ -128,27 +128,24 @@ def logout():
 @app.route("/settings", methods=['GET', 'POST'])
 def settings():
     global pixel_conf
-    ip_address = get_ip_address()
-    # Status msg for feedback to user
-    status_msg = ""
-    # Authentication first
-    login_status = auth_check(ip_address)
-    # not allowed even if logged in
-    if login_status == "invalid":
-        return redirect('/invalid')
-    # Network approval not sufficient for useradmin - must be logged in
-    # If not approved then issue login page
-    if not (login_status == "logged_in") :
-        return redirect('/login')
-    # Reach here then this is logged in - also need to check they are admin
-    username = session['username']
-    if not (auth.check_admin(username)):
+    authorized = check_permission_admin ()
+    if authorized != 'admin':
+        if (authorized == "invalid"):
+            # not allowed even if logged in
+            return redirect('/invalid')
+        # needs to login
+        if (authorized == "login"):
+            return redirect('/login')
+        # Last option is "notadmin"
         # If trying to do admin, but not an admin then we log them off
         # before allowing them to login again
         session.pop('username', None)
         return render_template('login.html', message='Admin permissions required')
     
     # Reach here logged in as an admin user - update settings and/or display setting options
+    username = session['username']
+    status_msg = ""
+    
     if request.method == 'POST':
         #username = session['username']  # needed for logging the action
         
@@ -420,6 +417,51 @@ def edituser():
             # Gives unknown error - but should really be caught already
             return redirect('useradmin?msg=Unknown error')
 
+
+@app.route("/deluser", methods=['GET'])
+def deluser():
+    global pixel_conf
+    authorized = check_permission_admin ()
+    if authorized != 'admin':
+        if (authorized == "invalid"):
+            # not allowed even if logged in
+            return redirect('/invalid')
+        # needs to login
+        if (authorized == "login"):
+            return redirect('/login')
+        # Last option is "notadmin"
+        # If trying to do admin, but not an admin then we log them off
+        # before allowing them to login again
+        session.pop('username', None)
+        return render_template('login.html', message='Admin permissions required')
+    ### logged in as an admin user
+    # get username from session and other objects required
+    username = session['username']
+    user_admin = ServerUserAdmin(auth_users_filename, pixel_conf.get_value('algorithm'))
+    # status_msg used in case we need to tell the user something
+    status_msg = ""
+    
+    if not 'action' in request.args.keys() or not 'user' in request.args.keys():
+        return redirect('useradmin?msg=Invalid delete request')
+    requested_action = request.args.get('action')
+    requested_user = request.args.get('user')
+    # variables beginning with requested have not been validated so only use for comparisons - or perform other security checks
+    if requested_action == "delete":
+        # check requested_user exists
+        if not user_admin.user_exists(requested_user):
+            return redirect('useradmin?msg=Invalid user')
+        return render_template('deleteuser.html', user=username, admin=True, deluser=requested_user)
+    # After confirmation of deletion
+    elif requested_action == "delete-yes":
+        # check it's a valid user first and that we are not deleting the last user
+        if user_admin.user_exists(requested_user):
+            if user_admin.num_users() < 2:
+                return redirect('useradmin?msg=Cannot delete last user')
+            user_admin.delete_user(requested_user)
+            user_admin.save_users()
+            return redirect('useradmin?msg=User request')
+    else:
+        return redirect('useradmin?msg=Invalid user')
                 
 @app.route("/useradmin", methods=['GET', 'POST'])
 def useradmin():
@@ -443,31 +485,6 @@ def useradmin():
     user_admin = ServerUserAdmin(auth_users_filename, pixel_conf.get_value('algorithm'))
     # status_msg used in case we need to tell the user something
     status_msg = ""
-
-
-    if 'action' in request.args.keys() and 'user' in request.args.keys():
-        requested_action = request.args.get('action')
-        requested_user = request.args.get('user')
-        # variables beginning with requested have not been validated so only use for comparisons - or perform other security checks
-        if requested_action == "delete":
-            # check requested_user exists
-            if not user_admin.user_exists(requested_user):
-                return redirect('useradmin?msg=Invalid user')
-            return render_template('deleteuser.html', user=username, admin=True, deluser=requested_user)
-        # After confirmation of deletion
-        elif requested_action == "delete-yes":
-            # check it's a valid user first and that we are not deleting the last user
-            if user_admin.user_exists(requested_user):
-                if user_admin.num_users() < 2:
-                    return redirect('useradmin?msg=Cannot delete last user')
-                user_admin.delete_user(requested_user)
-                user_admin.save_users()
-                user_table = user_admin.html_table_all()
-                return render_template ('useradmin.html', user=username, admin=True, table=user_table)
-        else:
-            # invalid request
-            return redirect('useradmin?msg=Invalid request')
-
                 
     # Reach here then show users       
     # display list of users
