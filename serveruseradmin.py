@@ -329,7 +329,7 @@ class ServerUserAdmin():
     def html_table_all (self):
         html_string = ""
         for userkey, uservalue in self.users.items():
-            html_string += "<tr><td><a href=\"useradmin?user="+userkey+"&action=edit\">"+userkey+"</a></td>"
+            html_string += "<tr><td><a href=\"edituser?user="+userkey+"&action=edit\">"+userkey+"</a></td>"
             html_string += "<td>"+uservalue.real_name+"</td>"
             html_string += "<td>"+uservalue.user_type+"</td>"
             html_string += "<td>"+uservalue.email+"</td>"

@@ -175,7 +175,7 @@ function settings() {
 }
 
 // redirect to profile page
-function profile() {
+function profile() {                  
     window.location.href="profile";
 }
 
@@ -194,7 +194,12 @@ function go_index() {
     window.location.href="home";
 }
 
+function go_add_user() {
+    window.location.href="useradmin?action=new";
+}
+
 // Submit form from button outside of the form
 function save_settings() {
     $( "#settingsform" ).submit();
 }
+                                                             
