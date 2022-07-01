@@ -382,7 +382,7 @@ def edituser():
         if not user_admin.user_exists(requested_user):
             return redirect('useradmin?msg=Invalid edit user request')
         html_form = user_admin.html_edit_user(requested_user)
-        return render_template('edituser.html', user=username, admin=True, form=html_form)
+        return render_template('edituser.html', user=username, admin=True, form=html_form, edituser=requested_user)
         
     # Otherwise it's a post so edit save request
     else :
@@ -463,7 +463,70 @@ def deluser():
     else:
         return redirect('useradmin?msg=Invalid user')
                 
-@app.route("/useradmin", methods=['GET', 'POST'])
+                
+                
+@app.route("/passwordadmin", methods=['GET', 'POST'])
+def passwordadmin():
+    global pixel_conf
+    authorized = check_permission_admin ()
+    if authorized != 'admin':
+        if (authorized == "invalid"):
+            # not allowed even if logged in
+            return redirect('/invalid')
+        # needs to login
+        if (authorized == "login"):
+            return redirect('/login')
+        # Last option is "notadmin"
+        # If trying to do admin, but not an admin then we log them off
+        # before allowing them to login again
+        session.pop('username', None)
+        return render_template('login.html', message='Admin permissions required')
+    ### logged in as an admin user
+    # get username from session and other objects required
+    username = session['username']
+    user_admin = ServerUserAdmin(auth_users_filename, pixel_conf.get_value('algorithm'))
+    # status_msg used in case we need to tell the user something
+    status_msg = ""
+     
+    # if GET then just username and create
+    # form with new password
+    if request.method == 'GET':
+        if not 'user' in request.args.keys():
+            return redirect('useradmin?msg=Invalid password admin request')
+        requested_user = request.args.get('user')
+        # check it's a valid user
+        if not user_admin.user_exists(requested_user):
+            return redirect('useradmin?msg=Invalid password admin request')
+        html_form = user_admin.html_password_admin(requested_user)
+        return render_template('passwordadmin.html', user=username, admin=True, form=html_form)
+        
+    # Otherwise it's a post so edit save request
+    else :                
+        try:
+            requested_user = request.form['username']
+            if not user_admin.user_exists(requested_user):
+                return redirect('useradmin?msg=Invalid update request')
+        except:
+            return redirect('useradmin?msg=Invalid password request')
+        # requested_user exists
+ 
+        # Now check that repeat is same
+        if (not 'newpassword' in request.form) or (not 'repeatpassword' in request.form) or request.form['newpassword'] != request.form['repeatpassword']:
+            password_form = user_admin.html_password_admin(requested_user)
+            return render_template('passwordadmin.html', user=username, admin=True, form=password_form, message="New passwords do not match")
+        new_password = request.form['newpassword']
+        # check password is valid (meets rules)
+        result = user_admin.validate_password(new_password)
+        if result[0] != True:
+            password_form = user_admin.html_password_admin(requested_user)
+            return render_template('passwordadmin.html', user=username, admin=True, form=password_form, message=result[1])
+        # passed tests so set new password
+        user_admin.change_password(requested_user, new_password)
+        user_admin.save_users()
+        # redirects to useradmin
+        return redirect('useradmin?msg=Password changed')
+                
+@app.route("/useradmin", methods=['GET'])
 def useradmin():
     global pixel_conf
     authorized = check_permission_admin ()

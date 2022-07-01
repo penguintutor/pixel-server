@@ -282,6 +282,22 @@ class ServerUserAdmin():
         return html_string
 
 
+    def html_password_admin (self, username):
+        html_string = ""
+        # Check user exists
+        if not username in self.users:
+            return "Invalid user selected\n"
+        this_user = self.users[username]
+        # Create form
+        html_string += "<label for=\"username\">Username:</label>\n"
+        html_string += "<input type=\"text\" id=\"username\" name=\"username\" value=\"{}\" readonly><br />\n".format(this_user.username)
+        html_string += "<label for=\"newpassword\">New Password:</label>\n"
+        html_string += "<input type=\"password\" id=\"newpassword\" name=\"newpassword\" value=\"\"><br />\n"
+        html_string += "<label for=\"repeatpassword\">Repeat Password:</label>\n"
+        html_string += "<input type=\"password\" id=\"repeatpassword\" name=\"repeatpassword\" value=\"\"><br />\n"
+        return html_string
+
+
     # Creates a form, but all fields are read only
     def html_view_profile (self, username):
         html_string = ""
