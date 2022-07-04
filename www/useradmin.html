@@ -50,6 +50,7 @@
         </table>
         
         <form action="newuser">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" name="submit" value="Add New User" >
         </form>
         

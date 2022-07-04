@@ -37,7 +37,7 @@
         <p>The following items are readonly. Please contact an admin for any changes.</p>
         
         <form id="userform" action="profile" method="post">
-        
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {{ form|safe }}
         
         <!--<input type="submit" name"submit" value="Save User">-->

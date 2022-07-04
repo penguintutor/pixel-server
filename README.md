@@ -33,6 +33,10 @@ To install the RPI ws281x library:
 
     sudo pip3 install rpi_ws281x
 
+To install the Flask CSRF protection
+    sudo pip3 install Flask-WTF
+
+
 It is recommended to install this program directly from git, which will allow for install of future updates. Note that updates will replace any custom sequences you have created. To provide support for different usernames I recommend installing into the /opt directory.
 
 On a Raspberry Pi, open a terminal and enter the following commands:
@@ -63,34 +67,6 @@ For more information see: [Penguin Tutor guide to starting programs automaticall
 ## Enable SSL (HTTPS)
 
 This explains how you can use the Flask (development) server with https using Nginx as a reverse proxy. This uses a free security certificate from [Let's Encrypt](https://letsencrypt.org/). This means that I am able to setup Nginx as a reverse proxy on my home server, which could be used to provide encrypted connections to different services.
-
-
-### On local pi with pixel-server
-Setup Flask to use gunicorn
-
-sudo apt update
-sudo apt ugprade
-
-sudo apt install python3-gunicorn
-
-Create a file /etc/systemd/system/gunicorn.service with the following:
-    [Unit]
-    Description=gunicorn daemon
-    After=network.target
-
-    [Service]
-    User=www-data
-    Group=www-data
-    WorkingDirectory=/var/www/application/
-
-    ExecStart=/usr/bin/gunicorn --access-logfile - --workers 3 --bind
-    unix:/var/www/application.sock wsgi:app
-
-    [Install]
-    WantedBy=multi-user.target
-
-
-
 
 
 ### On Nginx reverse proxy
@@ -129,6 +105,7 @@ Add the following to crontab for root:
 0 12 * * * /usr/bin/certbot renew --quiet
 
 This checks for updates on a daily basis and if required renew
+
 
 ## Login
 

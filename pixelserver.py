@@ -6,6 +6,7 @@ from flask import render_template
 from flask import session
 from flask import redirect
 from flask import Markup
+from flask_wtf.csrf import CSRFProtect
 from rpi_ws281x import *
 import threading
 import logging, os
@@ -48,12 +49,15 @@ on_status = False
 # List of sequences
 seq_list = SeqList()
 
+csrf = CSRFProtect()
 app = Flask(
     __name__,
     template_folder="www"
     )
 # Create a secret_key to last whilst the program is running
 app.secret_key = ''.join(random.choice(string.ascii_letters) for i in range(15))
+csrf.init_app(app)
+
 
 auth = ServerAuth(auth_config_filename, auth_users_filename)
 
@@ -154,6 +158,9 @@ def settings():
         # process the form - validate all parameters
         # Read into separate values to validate all before updating
         for key, value in request.form.items():
+            # skip csrf token
+            if key == "csrf_token":
+                continue
             #print ("Key {} Value {}".format(key, value))
             (status, temp_value) = pixel_conf.validate_parameter(key, value)
             #print ("Status {} Value {}".format(status, temp_value))
@@ -297,7 +304,7 @@ def newuser():
 
     # get request initial request return blank form requesting username
     if request.method == 'GET':
-        
+             
         return render_template('newuser.html', user=username, admin=True, form=user_admin.html_new_user())
     if request.method == 'POST':
         # New user - just has username - creates fields based on blank user

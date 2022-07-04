@@ -35,6 +35,7 @@
         <p>{{ message }}</p>
         
         <form id="userform" action="edituser" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         {{ form|safe }}
         
