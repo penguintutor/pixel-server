@@ -151,7 +151,6 @@ def settings():
     status_msg = ""
     
     if request.method == 'POST':
-        #username = session['username']  # needed for logging the action
         
         update_dict = {}
         
@@ -161,19 +160,15 @@ def settings():
             # skip csrf token
             if key == "csrf_token":
                 continue
-            #print ("Key {} Value {}".format(key, value))
             (status, temp_value) = pixel_conf.validate_parameter(key, value)
-            #print ("Status {} Value {}".format(status, temp_value))
             # If we get an error at any point - don't save and go back to 
             # showing current status
             if (status == False):
                 status_msg = temp_value
-                #print (status_msg)
                 break
             # Save this for updating values - use returned value
             # in case it's been sanitised (only certain types are)
             update_dict[key] = temp_value
-            #print ("Dict updated with {} Value {}".format(key, temp_value))
             
         # special case any checkboxes are only included if checked
         if not ("ledinvert" in request.form.keys()):
@@ -273,6 +268,7 @@ def password():
         # passed tests so set new password
         user_admin.change_password(username, new_password)
         user_admin.save_users()
+        logging.info("Password changed by "+username)
         # redirects to profile
         return redirect('profile?msg=Password changed')
         
@@ -350,6 +346,7 @@ def newuser():
                 # save username and password (rest of fields empty)
                 user_admin.add_user(requested_username, requested_password)
                 user_admin.save_users()
+                logging.info("New user {} added by {}".format(requested_username, username))
                 # Now load user in edit mode
                 edit_form = user_admin.html_edit_user (requested_username)
                 return render_template('edituser.html', user=username, admin=True, form=edit_form)
@@ -416,6 +413,7 @@ def edituser():
         # save 
         if result == True:
             user_admin.save_users()
+            logging.info("User {} updated by {}".format(current_user, username))
             # redirect to main page
             return redirect('useradmin?msg=User updated')
         # if not then error - so reload original config
@@ -466,6 +464,7 @@ def deluser():
                 return redirect('useradmin?msg=Cannot delete last user')
             user_admin.delete_user(requested_user)
             user_admin.save_users()
+            logging.info("User {} deleted by {}".format(requested_user, username))
             return redirect('useradmin?msg=User request')
     else:
         return redirect('useradmin?msg=Invalid user')
@@ -530,6 +529,7 @@ def passwordadmin():
         # passed tests so set new password
         user_admin.change_password(requested_user, new_password)
         user_admin.save_users()
+        logging.info("User {} password changed by {}".format(requested_user, username))
         # redirects to useradmin
         return redirect('useradmin?msg=Password changed')
                 
