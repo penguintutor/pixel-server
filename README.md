@@ -32,6 +32,10 @@ For more details see:
 To install the RPI ws281x library:
 
     sudo pip3 install rpi_ws281x
+    
+To install the Argon hash algorithm
+
+    sudo apt install python3-argon2
 
 To install the Flask CSRF protection
     sudo pip3 install Flask-WTF
@@ -63,6 +67,12 @@ For more information see: [Penguin Tutor guide to starting programs automaticall
 
 
 # Security
+
+The pixel server is designed to support varying levels of security depending upon your system requirements. 
+
+If used on a private only network then it can be configured for network address authentication. 
+
+If allowing incoming connections from the Internet then it is recommended that user authentication is enabled and it is configured through SSL. The configuration below is based on using Nginx as a reverse proxy to provide HTTPS using a LetsEncrypt certificate.
 
 ## Enable SSL (HTTPS)
 
@@ -118,7 +128,7 @@ There are no users setup as default. Before you can login then you should create
 
     python3 createadmin.py <username> <password> >> users.cfg
 
-The angled brackets should not be included around the username or password. The double greater than will append to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up with multiple users with the same username using this command. Instead once you have setup the initial user you should login through the web interface to configure additional users.
+The angled brackets should not be included around the username or password. The double greater than symbols will append to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up with multiple users with the same username using this command. Instead once you have setup the initial user you should login through the web interface to configure additional users.
 
 # Automation
 
@@ -192,11 +202,16 @@ This code is in development and may change in operation. Details of significant 
 
 # Change log
 
-## June 2022
+## July 2022
 Authentication and logging enabled. This is a significant change which brings in additional security. Changes may be needed to user configuration files as well as generating a new user to administer the system.
 
-You may need to install additional libraries including python3-argon2
-`sudo apt install python3-argon2`
+You may need to install additional libraries including the following commands:
+
+    sudo pip3 install rpi_ws281x
+    sudo apt install python3-argon2
+    sudo pip3 install Flask-WTF
+
+
 
 ## May 2022
 Additional color option of "Custom Color". This allows custom colors to be used through a custom.light.cfg file. This is particularly useful if you want to be able to control color using cheerlights or would like to provide your own home automation with non-volitile color changes.
@@ -212,7 +227,7 @@ If you installed the software using a _git clone_ then you can update by issuing
 
 As long as you followed the instructions regarding using a custom configuration file, then your config will still be kept.
 
-If upgrading from a version prior to June 2022 then you may need to create a new configuration file for auth.cfg and a new users.cfg file using createadmin.py
+If upgrading from a version prior to July 2022 then you may need to create a new configuration file for auth.cfg and a new users.cfg file using createadmin.py
 
 # Development
 
