@@ -714,9 +714,10 @@ def mainThread():
 def get_ip_address():
     # Start by setting ip address to the real address
     ip_address = request.remote_addr
-    # if Nginx proxy then take real_address
-    if 'CLIENT_ADDRESS' in request.headers:
-        ip_address = request.headers.get('CLIENT_ADDRESS')
+    if 'X-Real-IP' in request.headers and auth.check_proxy(ip_address):
+        proxy_addr = ip_address
+        ip_address = request.headers.get('X-Real_IP')
+        logging.info("Proxy connection {} is {}".format(proxy_addr, ip_address))
     return ip_address
     
 # checks that network is allowed and user is an admin

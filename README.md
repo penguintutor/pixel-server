@@ -98,8 +98,12 @@ add new file in sites-available
 ln -s to /etc/nginx/sites-enabled
 
 
+Add the following in a location file (this assumes using /rpi1/ as the route
+for this particular server. 
+
     location /rpi1/ {
-        proxy_pass http://<localaddress>/;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://<pixelserver_address>/;
     }
 
 
@@ -194,6 +198,26 @@ SK6812_STRIP_BRGW
 SK6812_STRIP_BGRW
 SK6812_STRIP
 SK6812W_STRIP
+
+
+# Auth.cfg
+Controls authentication. Can have one or more of the following, which can be a single IP address, or a network subnet, multiple addresses or network subnets (comma seperated) or 0.0.0.0 (all addresses)
+Multiple entries will be appended to the access.
+proxy_server = 
+Any addresses in this range will be treated as proxy servers.
+If the proxy server has X-Real-IP set then that will be used instead of the local ip address of the server. Warning if that is not a proxy server then this
+could be a security risk (in terms of allowing non authenticated logins). Cannot be 0.0.0.0 (everywhere is a proxy doesn't make sense) - normally this will be specific IP address rather than range.
+If the attempt from the proxy server does not have X-Real_IP then the address will be treated as coming from that IP address.
+
+
+network_allow_always =
+Allways allow without login (useful for automation or local)
+
+network_allow_auth =
+Must always be a logged in user to change the light status
+normally this is 0.0.0.0 = allow all, but with authentication
+
+Note that to perform any adminstration tasks then must be in either of the above - but must also be authenticated.
 
 
 # Updates and changes

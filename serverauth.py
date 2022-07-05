@@ -16,6 +16,7 @@ class ServerAuth ():
         self.config_filename = auth_filename
         self.users_filename = users_filename
         self.error_msg = ""              # Add any error messages for reporting
+        self.proxy_servers = []         # List of proxy servers where X-Real-IP will be used
         self.network_allow_always = []          # list of allowed network addresses which don't require authentication (normally this is local addresses only)
         self.network_allow_auth = []            # as above, but does require authentication (normally this is 0.0.0.0 = allow all, but with authentication
         
@@ -61,8 +62,10 @@ class ServerAuth ():
                         self.update_network("always", value)
                     elif (key == "network_allow_auth"):
                         self.update_network("auth", value)
+                    elif (key == "proxy_server"):
+                        self.add_proxy (value)
 
-	    # File not found 
+        # File not found 
         except FileNotFoundError:
             self.errormsg = "File not found "+filename
             return 0
@@ -116,6 +119,16 @@ class ServerAuth ():
             logging.warning (ip_address+" Login failed incorrect password "+username)
         return False
            
+    def add_proxy (self, proxy_string):
+        # split based on commas
+        for this_proxy in proxy_string.split(","):
+            try:
+                self.proxy_servers.append(ipaddress.ip_network(this_proxy))
+                logging.info ("Proxy server "+this_proxy)
+            except:
+                logging.info ("Invalid proxy server "+this_proxy)
+
+           
     def update_network (self, auth_type, network_string):
         # auth_type determines which list we are updating
         if (auth_type == "always"):
@@ -131,45 +144,60 @@ class ServerAuth ():
                 logging.info ("Allow "+auth_type+" "+this_network)
             except:
                 logging.info ("Invalid network "+auth_type+" "+this_network)
-                #print ("Not a valid network address "+this_network+"\n")
-                
-        #print (auth_type + " " + str(auth_list))
+    
+    
+    
+    # check if an ip address is a proxy server
+    def check_proxy (self, ip_address):
+        ip_addr = ipaddress.ip_address(ip_address)
         
-	
-	# check network address against allow_always and allow_auth
-	# returns "always", "auth" or "none"
+        log_string = "Proxy check address: " + ip_address
+        for this_network in self.proxy_servers:
+            if ip_addr in this_network:
+                logging.info(log_string+" true")
+                return True
+            else :
+                logging.info(log_string+" false")
+                return False
+                
+        
+        
+    
+    
+    # check network address against allow_always and allow_auth
+    # returns "always", "auth" or "none"
     def check_network (self, ip_address):
-	    ip_addr = ipaddress.ip_address(ip_address)
-	    
-	    log_string = "Network auth address: " + ip_address
-	    
-	    # check for always first
-	    for this_network in self.network_allow_always:
-	        # special case check for 0.0.0.0 - which always passes
-	        if (ipaddress.ip_address("0.0.0.0") in this_network):
-	            logging.info(log_string+" always (global)")
-	            return ("always")
-	        elif ip_addr in this_network:
-	            logging.info(log_string+" always")
-	            return ("always")
-	    # check for always first
-	    for this_network in self.network_allow_auth:
-	        # special case check for 0.0.0.0 - which always passes
-	        if (ipaddress.ip_address("0.0.0.0") in this_network):
-	            logging.info(log_string+" auth (global)")
-	            return ("auth")
-	        elif ip_addr in this_network:
-	            logging.info(log_string+" auth")
-	            return ("auth")
-	    logging.info(log_string+"none\n")
-	    return ("none")
-	    
+        ip_addr = ipaddress.ip_address(ip_address)
+        
+        log_string = "Network auth address: " + ip_address
+        
+        # check for always first
+        for this_network in self.network_allow_always:
+            # special case check for 0.0.0.0 - which always passes
+            if (ipaddress.ip_address("0.0.0.0") in this_network):
+                logging.info(log_string+" always (global)")
+                return ("always")
+            elif ip_addr in this_network:
+                logging.info(log_string+" always")
+                return ("always")
+        # check for always first
+        for this_network in self.network_allow_auth:
+            # special case check for 0.0.0.0 - which always passes
+            if (ipaddress.ip_address("0.0.0.0") in this_network):
+                logging.info(log_string+" auth (global)")
+                return ("auth")
+            elif ip_addr in this_network:
+                logging.info(log_string+" auth")
+                return ("auth")
+        logging.info(log_string+"none\n")
+        return ("none")
+        
     def check_admin(self, username):
-	    this_user = self.load_user (username)
-	    if this_user == None: 
-	        return False
-	    if this_user.is_admin(): 
-	        return True
-	    return False
-	    
-	
+        this_user = self.load_user (username)
+        if this_user == None: 
+            return False
+        if this_user.is_admin(): 
+            return True
+        return False
+        
+    
