@@ -1,5 +1,5 @@
 import sys
-from serveruser import ServerUser
+from pixelserver.serveruser import ServerUser
 # Create admin user and password
 # Run using:
 # python3 createadmin.py <username> <password> >>users.cfg

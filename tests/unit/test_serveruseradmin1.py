@@ -1,4 +1,4 @@
-from serveruseradmin import ServerUserAdmin
+from pixelserver.serveruseradmin import ServerUserAdmin
 
 _test_user_file = "user.cfg" 
 _user_filename = None

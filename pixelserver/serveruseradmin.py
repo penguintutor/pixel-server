@@ -1,4 +1,4 @@
-from serveruser import ServerUser
+from pixelserver.serveruser import ServerUser
 
 # File format - colon seperated (colon not allowed in any of the fields)
 # username:password:real name:usertype:email:description

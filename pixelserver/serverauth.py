@@ -3,7 +3,7 @@
 import ipaddress
 from datetime import datetime
 import logging
-from serveruser import ServerUser
+from pixelserver.serveruser import ServerUser
 
 
 # network config file is only loaded initially (needs reload)

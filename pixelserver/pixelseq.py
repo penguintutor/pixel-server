@@ -1,6 +1,6 @@
 from rpi_ws281x import PixelStrip, Color
 import _rpi_ws281x as ws
-from pixelconfig import PixelConfig
+from pixelserver.pixelconfig import PixelConfig
 from flask import json
 import re
 import math
