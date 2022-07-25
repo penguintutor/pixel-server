@@ -113,7 +113,6 @@ def login():
             # create session
             session['username'] = username
             return redirect('/')
-        # Reach here then failed login attempt
         return render_template('login.html', message='Invalid login attempt')
     # New visit to login page
     return render_template('login.html')

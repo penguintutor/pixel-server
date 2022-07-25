@@ -203,6 +203,7 @@ SK6812W_STRIP
 # Auth.cfg
 Controls authentication. Can have one or more of the following, which can be a single IP address, or a network subnet, multiple addresses or network subnets (comma seperated) or 0.0.0.0 (all addresses)
 Multiple entries will be appended to the access.
+
 proxy_server = 
 Any addresses in this range will be treated as proxy servers.
 If the proxy server has X-Real-IP set then that will be used instead of the local ip address of the server. Warning if that is not a proxy server then this
