@@ -200,4 +200,34 @@ class ServerAuth ():
             return True
         return False
         
-    
+    # check authentication using network and user
+    # return "network", "logged_in", "login_required" or "invalid" (invalid = network rules prohibit)            
+    def auth_check (self, ip_address, session):
+        auth_type = self.check_network(ip_address)
+        # Also need to authenticate
+        if auth_type == "always" or auth_type=="auth":
+            # even if also check for logged in useful for admin logins
+            if 'username' in session:
+                return "logged_in"
+            elif (auth_type == "network"):
+                return "network"
+            else: 
+                return "login_required"
+        return "invalid"
+        
+    # checks that network is allowed and user is an admin
+    # on success return "admin"
+    # On fail could be "invalid" (not allowed), "login" (not logged in), "notadmin" (logged in as standard user)
+    def check_permission_admin (self, ip_address, session):
+        # check address first
+        login_status = pixelserver.auth.auth_check(ip_address, session)
+        if login_status == "invalid": 
+            return "invalid"
+        # Not logged in
+        if not (login_status == "logged_in") :
+            return "login"
+        # Get username and check user is admin
+        username = session['username']
+        if not (pixelserver.auth.check_admin(username)):
+            return "notadmin"
+        return "admin"

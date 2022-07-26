@@ -141,7 +141,6 @@ class ServerUser ():
     # on a Pi Zero - or sha256 which is faster, particularly on Pi Zero
     @staticmethod
     def hash_password (password, algorithm="Argon2"):
-        #password_bytes = bytes(password, 'utf-8')
         if algorithm == "SHA256":
             salt = uuid.uuid4().hex
             return "$5$" + salt + "$" + hashlib.sha256(salt.encode() + password.encode()).hexdigest()

@@ -1,50 +1,23 @@
-#!/usr/bin/env python3
 import time
-#from flask import Flask
 from flask import request
 from flask import render_template
 from flask import session
 from flask import redirect
 from flask import Markup
-#from flask_wtf.csrf import CSRFProtect
 import threading
 import logging, os
-#import random
-#import string
 import pixelserver
-from pixelserver.pixelconfig import PixelConfig
-from pixelserver.pixelseq import PixelSeq, SeqList
 from pixelserver.statusmsg import StatusMsg
-from pixelserver.customlight import CustomLight
 from pixelserver.serverauth import ServerAuth
 from pixelserver.serveruseradmin import ServerUserAdmin
 
 from . import requests_blueprint
 
-
-
-
-# check authentication using network and user
-# return "network", "logged_in", "login_required" or "invalid" (invalid = network rules prohibit)
-def auth_check (ip_address):
-    auth_type = pixelserver.auth.check_network(ip_address)
-    # Also need to authenticate
-    if auth_type == "always" or auth_type=="auth":
-        # even if also check for logged in useful for admin logins
-        if 'username' in session:
-            return "logged_in"
-        elif (auth_type == "network"):
-            return "network"
-        else: 
-            return "login_required"
-    return "invalid"
-
-
 @requests_blueprint.route("/")
 @requests_blueprint.route("/home")
 def main():
     ip_address = get_ip_address()
-    login_status = auth_check(ip_address)
+    login_status = pixelserver.auth.auth_check(ip_address, session)
     # not allowed even if logged in
     if login_status == "invalid":
         return redirect('/invalid')
@@ -65,7 +38,7 @@ def main():
 def login():
     # Start by setting ip address to the real address
     ip_address = get_ip_address()
-    login_status = auth_check(ip_address)
+    login_status = pixelserver.auth.auth_check(ip_address, session)
     # check not an unauthorised network
     if login_status == "invalid":
         return redirect('/invalid')
@@ -93,7 +66,7 @@ def logout():
 # network status
 @requests_blueprint.route("/settings", methods=['GET', 'POST'])
 def settings():
-    authorized = check_permission_admin ()
+    authorized = pixelserver.auth.check_permission_admin (get_ip_address(), session)
     if authorized != 'admin':
         if (authorized == "invalid"):
             # not allowed even if logged in
@@ -167,7 +140,7 @@ def profile():
     # Status msg for feedback to user
     status_msg = ""
     # Authentication first
-    login_status = auth_check(ip_address)
+    login_status = pixelserver.auth.auth_check(ip_address, session)
     # not allowed even if logged in
     if login_status == "invalid":
         return redirect('/invalid')
@@ -195,7 +168,7 @@ def password():
     # Status msg for feedback to user
     status_msg = ""
     # Authentication first
-    login_status = auth_check(ip_address)
+    login_status = pixelserver.auth.auth_check(ip_address, session)
     # not allowed even if logged in
     if login_status == "invalid":
         return redirect('/invalid')
@@ -236,7 +209,7 @@ def password():
     
 @requests_blueprint.route("/newuser", methods=['GET', 'POST'])
 def newuser():
-    authorized = check_permission_admin ()
+    authorized = pixelserver.auth.check_permission_admin (get_ip_address(), session)
     if authorized != 'admin':
         if (authorized == "invalid"):
             # not allowed even if logged in
@@ -313,7 +286,7 @@ def newuser():
     
 @requests_blueprint.route("/edituser", methods=['GET', 'POST'])
 def edituser():
-    authorized = check_permission_admin ()
+    authorized = pixelserver.auth.check_permission_admin (get_ip_address(), session)
     if authorized != 'admin':
         if (authorized == "invalid"):
             # not allowed even if logged in
@@ -382,7 +355,7 @@ def edituser():
 
 @requests_blueprint.route("/deluser", methods=['GET'])
 def deluser():
-    authorized = check_permission_admin ()
+    authorized = pixelserver.auth.check_permission_admin (get_ip_address(), session)
     if authorized != 'admin':
         if (authorized == "invalid"):
             # not allowed even if logged in
@@ -429,7 +402,7 @@ def deluser():
                 
 @requests_blueprint.route("/passwordadmin", methods=['GET', 'POST'])
 def passwordadmin():
-    authorized = check_permission_admin ()
+    authorized = pixelserver.auth.check_permission_admin (get_ip_address(), session)
     if authorized != 'admin':
         if (authorized == "invalid"):
             # not allowed even if logged in
@@ -490,7 +463,7 @@ def passwordadmin():
                 
 @requests_blueprint.route("/useradmin", methods=['GET'])
 def useradmin():
-    authorized = check_permission_admin ()
+    authorized = pixelserver.auth.check_permission_admin (get_ip_address(), session)
     if authorized != 'admin':
         if (authorized == "invalid"):
             # not allowed even if logged in
@@ -551,7 +524,7 @@ def seqJSON ():
 def setSeq():
     # Authentication first
     ip_address = get_ip_address()
-    login_status = auth_check(ip_address)
+    login_status = pixelserver.auth.auth_check(ip_address, session)
     # not allowed even if logged in
     if login_status == "invalid":
         return render_template('invalid.html')
@@ -611,10 +584,6 @@ def setSeq():
     pixelserver.upd_time = time.time()
     return status.get_message ()
 
-#def flaskThread():
-#    app.run(host='0.0.0.0', port=80)
-    
-
 
 # Gets IP address - supports proxy headers or normal network
 def get_ip_address():
@@ -626,26 +595,7 @@ def get_ip_address():
         logging.info("Proxy connection {} is {}".format(proxy_addr, ip_address))
     return ip_address
     
-# checks that network is allowed and user is an admin
-# on success return "admin"
-# On fail could be "invalid" (not allowed), "login" (not logged in), "notadmin" (logged in as standard user)
-def check_permission_admin ():
-    # check address first
-    ip_address = get_ip_address()
-    login_status = auth_check(ip_address)
-    if login_status == "invalid": 
-        return "invalid"
-    # Not logged in
-    if not (login_status == "logged_in") :
-        return "login"
-    # Get username and check user is admin
-    username = session['username']
-    if not (pixelserver.auth.check_admin(username)):
-        return "notadmin"
-    return "admin"
-
-   
-    
+ 
 # Also converts to the format used by ServerUser 
 # eg. real_name instead of realname which is used in form
 # Any errors return with error dict instead
