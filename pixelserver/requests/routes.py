@@ -22,7 +22,8 @@ def main():
     if login_status == "invalid":
         return redirect('/invalid')
     elif login_status == "network":
-        return ('index.html')
+        #return ('index.html')
+        return render_template('index.html', user="guest", admin=False)
     elif login_status == "logged_in":
         # Also check if admin - to show settings button
         username = session['username']

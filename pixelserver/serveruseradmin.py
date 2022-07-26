@@ -104,6 +104,10 @@ class ServerUserAdmin():
         if (':' in username or ':' in real_name or 
             ':' in user_type or ':' in email or ':' in description):
             return "invalid"
+            
+        # Also guest user not permitted as that has special meaning
+        if (username == "guest"):
+            return "invalid"
 
         password_hash = ServerUser.hash_password (password_text, self.algorithm)
         

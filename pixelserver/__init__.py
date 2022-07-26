@@ -32,21 +32,25 @@ seq_list = SeqList()
 def load_config(default_config_filename, custom_config_filename, custom_light_config_filename):
     return PixelConfig(default_config_filename, custom_config_filename, custom_light_config_filename)
 
-def create_app(auth_config_filename, auth_users_filename, log_filename):
+# Should always run with csrf=True
+# csrf_enable=False is only included for testing purposes (disables CSRF)
+def create_app(auth_config_filename, auth_users_filename, log_filename, csrf_enable=True):
     pixelserver.auth_config_filename = auth_config_filename
     pixelserver.auth_users_filename = auth_users_filename
     
     start_logging (log_filename)
     pixelserver.auth = ServerAuth(auth_config_filename, auth_users_filename)
     
-    csrf = CSRFProtect()
+    if csrf_enable:
+        csrf = CSRFProtect()
     app = Flask(
         __name__,
         template_folder="www"
         )
     # Create a secret_key to last whilst the program is running
     app.secret_key = ''.join(random.choice(string.ascii_letters) for i in range(15))
-    csrf.init_app(app)
+    if csrf_enable:
+        csrf.init_app(app)
     register_blueprints(app)
     return app
     

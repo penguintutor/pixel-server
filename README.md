@@ -2,6 +2,7 @@
 Wireless control of PixelStrips or NeoPixels using a web graphical interface running on a Raspberry Pi.
 
 Works with any Raspberry Pi.
+On older Raspberry Pi models (Raspberry Pi V1 or Raspberry Pi Zero) then it is recommended running in headless mode and without using a local web browser. For newer models that should not be necessary.
 
 For more details see:
 <http://www.penguintutor.com/projects/pixel-server>

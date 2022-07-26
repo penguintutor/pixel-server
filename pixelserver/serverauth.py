@@ -204,12 +204,13 @@ class ServerAuth ():
     # return "network", "logged_in", "login_required" or "invalid" (invalid = network rules prohibit)            
     def auth_check (self, ip_address, session):
         auth_type = self.check_network(ip_address)
+        
         # Also need to authenticate
         if auth_type == "always" or auth_type=="auth":
             # even if also check for logged in useful for admin logins
             if 'username' in session:
                 return "logged_in"
-            elif (auth_type == "network"):
+            elif (auth_type == "always"):
                 return "network"
             else: 
                 return "login_required"

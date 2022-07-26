@@ -16,7 +16,9 @@
         <div id="divstatus">
             <h2>Please login to access</h2>
             <form action="login" method="post">
+            {% if csrf_token %}
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
             <label for="username">Username:</label>
             <input type="text" id="username" name="username"><br />
             <label for="password">Password:</label>

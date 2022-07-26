@@ -1,0 +1,4 @@
+# Valid usernames for testing
+
+# users.cfg
+admin / pixel1login2
