@@ -1,4 +1,5 @@
 from pixelserver.serveruser import ServerUser
+import logging
 
 # File format - colon seperated (colon not allowed in any of the fields)
 # username:password:real name:usertype:email:description
@@ -59,16 +60,20 @@ class ServerUserAdmin():
                     except Exception as e:
                         # If corrupt file then just exit as can't trust to be safe
                         print ("Corrupt file - invalid entry in "+self.filename)
+                        logging.error("Corrupt file - invalid entry in "+self.filename)
                         print (str(e))
                         return False
         except FileNotFoundError:
             print ("Error file not found "+self.filename)
+            logging.error ("Error file not found "+self.filename)
             return False
         except OSError:
             print ("Error file read error "+self.filename)
+            logging.error ("Error file read error "+self.filename)
             return False
         except Exception as e:
             print ("Unknown error reading file "+self.filename+" "+str(e))
+            logging.error ("Unknown error reading file "+self.filename+" "+str(e))
             return False
         # Success
         return True
@@ -149,7 +154,6 @@ class ServerUserAdmin():
             # Validate username - check not duplicate and only alpha numeric
             # Does not check other rules
             if new_username in self.users.keys() or not new_username.isalnum():
-                print ("Reject username")
                 return False
             # First update the username inside the existing entry 
             self.users[current_username].username = new_username

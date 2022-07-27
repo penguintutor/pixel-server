@@ -6,12 +6,15 @@ from rpi_ws281x import *
 import time
 
 class Pixels():
-    def __init__ (self, default_config, custom_config, light_config):
+    def __init__ (self, default_config, custom_config, light_config, run=True):
         self.default_config = default_config
         self.custom_config = custom_config
         self.light_config = light_config
         pixelserver.pixel_conf = pixelserver.load_config(self.default_config, self.custom_config, self.light_config)
-        self.pixels = PixelSeq(pixelserver.pixel_conf)
+        if (run == True):
+            self.pixels = PixelSeq(pixelserver.pixel_conf)
+        else: 
+            self.pixels = None
         # Use for custom color lights (eg CheerLights)
         self.custom_light = CustomLight(pixelserver.pixel_conf.customlightcfg)
         

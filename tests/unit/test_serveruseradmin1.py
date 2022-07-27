@@ -7,10 +7,14 @@ def tmp_dir_setup (tmp_path_factory):
     global _user_filename
     _user_filename = str(tmp_path_factory.mktemp("users") / "user.cfg")
 
+# Setup path factory and empty user file
+def test_setup_factory(tmp_path_factory):
+    tmp_dir_setup(tmp_path_factory)
+    # Create an empty file
+    open(_user_filename, 'a').close()
 
 # Test creating a new user
-def test_add_user1(tmp_path_factory):
-    tmp_dir_setup(tmp_path_factory)
+def test_add_user1():
     user_admin = ServerUserAdmin(_user_filename)
     result = user_admin.add_user(
         "test1", "password", 
@@ -51,19 +55,16 @@ def test_invalid_user():
     user_admin = ServerUserAdmin(_user_filename)
     assert not user_admin.user_exists("invalid1")    
     
-    
 # Test passwords
 def test_user_password():
     user_admin = ServerUserAdmin(_user_filename)
     assert user_admin.check_username_password ("longerusername",
         "password123")
     
-    
 def test_incorrect_password():
     user_admin = ServerUserAdmin(_user_filename)
     assert not user_admin.check_username_password ("longerusername",
         "passw0rd123")
-    
     
 # Test permissions
 def test_user1_admin():
@@ -73,7 +74,6 @@ def test_user1_admin():
 def test_user2_not_admin():
     user_admin = ServerUserAdmin(_user_filename)
     assert not user_admin.check_admin ("test2")
-    
     
 # Test handling of invalid username (includes a :)
 def test_username_colon():
@@ -95,7 +95,6 @@ def test_password_colon():
         "normal", "email@test.com",
         "This should pass as colon allowed in password")
     assert result == "success"
-
 
 # Test duplicate is rejected
 def test_duplicate_user():
@@ -126,8 +125,6 @@ def test_username_change():
     # Also check full name to make sure it's the original entry
     assert user_admin.get_real_name("newusername") == "My name"
     
-    
-
 # Test changing username after creation - doesn't allow colon
 def test_username_change_colon():
     user_admin = ServerUserAdmin(_user_filename)

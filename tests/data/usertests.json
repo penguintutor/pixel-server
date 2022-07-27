@@ -1,0 +1,92 @@
+[
+{
+    "username":"testuser1",
+    "password":"A very long password with spaces 1",
+    "realname":"Fullname of test user 1",
+    "admin":"False",
+    "email":"",
+    "description":"",
+    "error": "none",
+    "errormsg": ""
+},
+{
+    "username":"testuser2",
+    "password":"pass;3%$380583",
+    "realname":"Fullname of test user 1 with :",
+    "admin":"False",
+    "email":"me@here334.com",
+    "description":"Test",
+    "error": "edit",
+    "errormsg": "Invalid character in name"
+},
+{
+    "username":"testadmin1",
+    "password":"pass-----33383",
+    "realname":"Fullname of test user 1 with",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Test description",
+    "error": "none",
+    "errormsg": ""
+},
+{
+    "username":"testadmin2",
+    "password":"pass-----33383",
+    "realname":"Fullname of test user 1 with",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Test description with <script>embedded</script>",
+    "error": "edit",
+    "errormsg": "Test description with embedded"
+},
+{
+    "username":"testadmin3",
+    "password":"pass3383",
+    "realname":"Fullname of test user ",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Test description with :",
+    "error": "edit",
+    "errormsg": "Invalid character in description"
+},
+{
+    "username":"testadmin2",
+    "password":"pass-----33383",
+    "realname":"Fullname of test user 1 with",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Test description with <script>embedded</script>",
+    "error": "username",
+    "errormsg": "User already exists, please try another username"
+},
+{
+    "username":"testpass1",
+    "password":"pass",
+    "realname":"Fullname of test user 1 with",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Pasword fail",
+    "error": "password",
+    "errormsg": "Password must be at least 8 characters long"
+},
+{
+    "username":"testpass2",
+    "password":"passwordnodigit",
+    "realname":"Fullname of test user 1 with",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Test description ",
+    "error": "password",
+    "errormsg": "Password must contain at least one letter and one digit"
+},
+{
+    "username":"testpass3",
+    "password":"38478378947",
+    "realname":"Fullname of test user 1 with",
+    "admin":"True",
+    "email":"admin@here334.com",
+    "description":"Test description ",
+    "error": "password",
+    "errormsg": "Password must contain at least one letter and one digit"
+}
+]

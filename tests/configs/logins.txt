@@ -1,4 +1,10 @@
 # Valid usernames for testing
 
 # users.cfg
+## Argon 2
 admin / pixel1login2
+stduser1 / pixel1login2
+
+## SHA256
+adminuser1 / pixel1login2
+stduser2 / pixel1login2

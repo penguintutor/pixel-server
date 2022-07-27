@@ -50,7 +50,9 @@
         </table>
         
         <form action="newuser">
+        {% if csrf_token %}
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
         <input type="submit" name="submit" value="Add New User" >
         </form>
         

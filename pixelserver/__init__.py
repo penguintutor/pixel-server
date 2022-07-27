@@ -34,11 +34,18 @@ def load_config(default_config_filename, custom_config_filename, custom_light_co
 
 # Should always run with csrf=True
 # csrf_enable=False is only included for testing purposes (disables CSRF)
-def create_app(auth_config_filename, auth_users_filename, log_filename, csrf_enable=True):
+# debug = True (include debug messages in log - eg Testing)
+# debug = False - minimum INFO messages are logged
+def create_app(auth_config_filename, auth_users_filename, log_filename, csrf_enable=True, debug=False):
     pixelserver.auth_config_filename = auth_config_filename
     pixelserver.auth_users_filename = auth_users_filename
     
-    start_logging (log_filename)
+    if debug==False:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+    
+    start_logging (log_filename, log_level)
     pixelserver.auth = ServerAuth(auth_config_filename, auth_users_filename)
     
     if csrf_enable:
@@ -55,8 +62,8 @@ def create_app(auth_config_filename, auth_users_filename, log_filename, csrf_ena
     return app
     
 #Turn on logging through systemd
-def start_logging(log_filename):
-    logging.basicConfig(level=logging.INFO, filename=log_filename, filemode='a', format='%(asctime)s %(levelname)-4s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+def start_logging(log_filename, log_level=logging.INFO):
+    logging.basicConfig(level=log_level, filename=log_filename, filemode='a', format='%(asctime)s %(levelname)-4s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     logging.info ("PixelServer application start")
     
 #Register routes as @requests

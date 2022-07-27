@@ -42,7 +42,7 @@ class CustomLight():
         # Reset list of colors
         self.colors.clear()
         # Compile regexp for more efficient matching
-        re_color = re.compile("^#?([\dA-Fa-f]{6})")
+        re_color = re.compile("^#?([0-9A-Fa-f]{6})")
         
         # Try and open file - if not exist then just will be caught as exception
         try:

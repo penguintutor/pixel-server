@@ -35,8 +35,9 @@
         <p>{{ message }}</p>
         
         <form id="userform" action="newuser" method="post">
+        {% if csrf_token %}
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        
+        {% endif %}
         {{ form|safe }}
         
         <input type="submit" name"submit" value="Save User">

@@ -3,6 +3,7 @@
 import ipaddress
 from datetime import datetime
 import logging
+import pixelserver
 from pixelserver.serveruser import ServerUser
 
 
@@ -160,9 +161,7 @@ class ServerAuth ():
                 logging.info(log_string+" false")
                 return False
                 
-        
-        
-    
+
     
     # check network address against allow_always and allow_auth
     # returns "always", "auth" or "none"
@@ -189,7 +188,7 @@ class ServerAuth ():
             elif ip_addr in this_network:
                 logging.info(log_string+" auth")
                 return ("auth")
-        logging.info(log_string+"none\n")
+        logging.info(log_string+" none")
         return ("none")
         
     def check_admin(self, username):

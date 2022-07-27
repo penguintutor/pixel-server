@@ -120,6 +120,7 @@ class ServerUser ():
             salt, just_hash = self.password_hash[3:].split('$')
             hashed_given_password = hashlib.sha256(salt.encode() + password.encode()).hexdigest()
             return hashed_given_password == just_hash
+        # If not should be Argon2 $Argon2id$ (id = variant - could be i or d)
         else:
             ph = PasswordHasher()
             # Invalid password raises exception - catch and return false

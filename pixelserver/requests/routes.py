@@ -482,13 +482,15 @@ def useradmin():
     username = session['username']
     user_admin = ServerUserAdmin(pixelserver.auth_users_filename, pixelserver.pixel_conf.get_value('algorithm'))
     # status_msg used in case we need to tell the user something
-    status_msg = ""
+    get_status_msg = request.args.get('msg')
+    # strip tags from msg
+    status_msg = Markup(get_status_msg).striptags()
                 
     # Reach here then show users       
     # display list of users
     user_table = user_admin.html_table_all()
 
-    return render_template ('useradmin.html', user=username, admin=True, table=user_table)
+    return render_template ('useradmin.html', user=username, admin=True, message=status_msg, table=user_table)
     
 
 ## No authentication required for generic files
@@ -617,8 +619,7 @@ def parse_form (user_admin, form_data):
                 return {"error": check_user[1]}
             # is valid so update dict
             data_dict['username'] = form_data['username']
-            
-                
+
     
     if 'realname' in form_data.keys():
         # reject if a colon (potential attack)
