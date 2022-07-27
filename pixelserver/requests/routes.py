@@ -155,7 +155,8 @@ def profile():
     status_msg = ""
     if 'msg' in request.args.keys():
         status_msg = request.args['msg']
-        # Todo - validate
+        # strip tags from status message
+        status_msg = Markup(status_msg).striptags()
     # Create user_admin object as needed shortly
     user_admin = ServerUserAdmin(pixelserver.auth_users_filename, pixelserver.pixel_conf.get_value('algorithm'))
     # get admin to determine if settings menu is displayed
@@ -652,7 +653,6 @@ def parse_form (user_admin, form_data):
             return {'error': "Invalid character in description"}
         # strip any tags
         data_dict['description'] = Markup(form_data['description']).striptags()
-        
     return data_dict
 
 
