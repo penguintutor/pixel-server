@@ -51,7 +51,7 @@ class ServerUser ():
         
     # Setting a new password will result in it converted to a hash
     # Does not check minimum length / other password requirements
-    # Using this does not give control over algorith - instead use set_password
+    # Using this does not give control over algorithm - instead use set_password
     @password.setter
     def password(self, new_password):
         self.set_password (new_password)

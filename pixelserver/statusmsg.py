@@ -12,7 +12,7 @@ class StatusMsg():
             'msg' : ""
             }
             
-    # Set based on current server values (may need to call later if succesful)
+    # Set based on current server values (may need to call later if successful)
     def set_server_values (self, seq_status):
         for key, value in seq_status.items():
             self.status[key] = value

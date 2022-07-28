@@ -22,7 +22,7 @@ import random
 allowed_chars = list(string.ascii_letters + string.digits + string.punctuation + " ")
 
 # how many times to change the password
-num_changes = 20
+num_changes = 10
 
 _config_src_directory = "tests/configs/"
 
