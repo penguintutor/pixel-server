@@ -52,7 +52,7 @@ def test_index_2():
     with app.test_client() as test_client:
         response = test_client.get('/')
         assert response.status_code == 302
-        assert response.location == "http://localhost/login"
+        assert (response.location == "http://localhost/login") or (response.location == "/login")
         
 # Not allowed
 def test_index_3():
@@ -60,7 +60,7 @@ def test_index_3():
     with app.test_client() as test_client:
         response = test_client.get('/')
         assert response.status_code == 302
-        assert response.location == "http://localhost/invalid"
+        assert (response.location == "http://localhost/invalid") or (response.location == "/invalid")
         
 # Test proxy- authentication required
 def test_index_4():
@@ -71,7 +71,7 @@ def test_index_4():
             headers={'X-Real_IP': '192.168.0.22'}
             )
         assert response.status_code == 302
-        assert response.location == "http://localhost/login"
+        assert (response.location == "http://localhost/login") or (response.location == "/login")
         
 # Test proxy - address not allowed
 def test_index_5():

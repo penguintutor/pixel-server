@@ -32,14 +32,17 @@ For more details see:
 
 To install the RPI ws281x library:
 
-    sudo pip3 install rpi_ws281x
+    pip3 install rpi_ws281x
     
 To install the Argon hash algorithm
 
     sudo apt install python3-argon2
 
 To install the Flask CSRF protection
-    sudo pip3 install Flask-WTF
+    pip3 install Flask-WTF
+    
+To be able to run the tests 
+    sudo apt install python3-pytest
 
 
 It is recommended to install this program directly from git, which will allow for install of future updates. Note that updates will replace any custom sequences you have created. To provide support for different usernames I recommend installing into the /opt directory.
