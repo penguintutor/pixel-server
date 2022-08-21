@@ -65,9 +65,7 @@ def test_setup_factory(tmp_path_factory):
     f.close()
     
 
-
-
-# Creates users
+# Creates users using json config file
 def test_create_users_1():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
     pixels = Pixels(configs['default'], "", "", run=False)

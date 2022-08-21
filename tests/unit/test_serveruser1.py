@@ -218,7 +218,7 @@ def test_passwords_empty_1():
     user1.set_password("")
     assert user1.check_password("")
 
-# does not apply full rules, so simplified valid 
+# does not apply full rules, so simplified valid passwords
 def _create_valid_password (max_chars = 20):
     # First create totally random string
     password = ''.join(random.choice(allowed_chars) for i in range(random.randint(1,max_chars)))
