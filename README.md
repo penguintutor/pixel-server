@@ -140,6 +140,31 @@ There are no users setup as default. Before you can login then you should create
 
 The angled brackets should not be included around the username or password. The double greater than symbols will append to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up with multiple users with the same username using this command. Instead once you have setup the initial user you should login through the web interface to configure additional users.
 
+### Docker install
+
+If you wish to use this project in a container, you can do so by entering the following commands:
+
+    cd ~
+    sudo mkdir pixel-server
+    sudo chown $USER: pixel-server
+    git clone https://github.com/penguintutor/pixel-server.git pixel-server
+
+Make sure to make changes to your config file, so that the pixel-server knows how to communicate with your neopixel device!
+
+    docker build . -t pixel-server
+    docker run --restart unless-stopped --privileged -p 80:80 pixel-server
+
+This will make the project run on port 80/HTTP and also start on boot.
+To update the container, enter the following commands:
+
+    docker stop pixel-server
+    docker rm pixel-server
+    cd ~/pixel-server/
+    git pull
+    docker build . -t pixel-server
+    docker run --restart unless-stopped --privileged -p 80:80 pixel-server
+    
+
 # Automation
 
 You can automate the light sequences being turned on and off by using crontab. For example:
