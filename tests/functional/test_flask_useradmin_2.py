@@ -10,7 +10,7 @@ import json
 # use csrf_enable = False in create_app() for any posts
 
 # For log debugging use debug=True in create_app()
-#  then using logging.debug 
+#  then using logging.debug
 
 # Users tmp_path_factory - files will be copied to:
 #/tmp/pytest-of-<username>/pytest-current/log?/pixelserver.log
@@ -31,12 +31,12 @@ data_file ="tests/data/usertests.json"
 # name of config files - will be mapped to temp directory
 # In tests use configs{} instead.
 config_filenames = {
-    'default' : "defaults.cfg",
-    'custom' : "pixelserver.cfg",
-    'sha256' : "sha256.cfg",
-    'light' : "customlight.cfg",
-    'auth' : "auth.cfg",
-    'users' : "users.cfg"
+    'default' : "defaults_test.cfg",
+    'custom' : "pixelserver_test.cfg",
+    'sha256' : "sha256_test.cfg",
+    'light' : "customlight_test.cfg",
+    'auth' : "auth_test.cfg",
+    'users' : "users_test.cfg"
 }
 
 
@@ -44,7 +44,7 @@ config_filenames = {
 configs = {}
 
 def tmp_dir_setup (tmp_path_factory):
-    global _log_directory, _log_filename, _config_directory 
+    global _log_directory, _log_filename, _config_directory
     _log_directory = str(tmp_path_factory.mktemp("log"))
     _log_filename = _log_directory + "/" + log_filename
     _config_directory = str(tmp_path_factory.mktemp("config"))
@@ -53,7 +53,7 @@ def tmp_dir_setup (tmp_path_factory):
         configs[key] = _config_directory + "/" + value
         # copy existing file to new location
         shutil.copyfile(_config_src_directory + value, configs[key])
-        
+
 
 # Setup path factory and empty user file
 def test_setup_factory(tmp_path_factory):
@@ -63,7 +63,7 @@ def test_setup_factory(tmp_path_factory):
     f = open (data_file)
     user_data = json.load(f)
     f.close()
-    
+
 
 # Creates users using json config file
 def test_create_users_1():
@@ -114,7 +114,7 @@ def test_create_users_1():
                 continue
             else:
                 assert response.status_code == 200
-                expect_string = '<input type="text" id="username" name="username" value="'+this_user['username']+'">' 
+                expect_string = '<input type="text" id="username" name="username" value="'+this_user['username']+'">'
                 assert expect_string in str(response.data)
 
 
@@ -159,7 +159,7 @@ def test_edit_users_1():
             assert response.status_code == 200
             # Check returns to user table - but not check updates at this point
             assert '<table id="users">' in str(response.data)
-            # Load the edituser and check values set 
+            # Load the edituser and check values set
             response = test_client.get('/edituser', query_string={
                     "user" : this_user['username'],
                     "action" : "edit"

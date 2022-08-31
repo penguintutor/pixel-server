@@ -33,15 +33,17 @@ For more details see:
 To install the RPI ws281x library:
 
     pip3 install rpi_ws281x
-    
+
 To install the Argon hash algorithm
 
     sudo apt install python3-argon2
 
 To install the Flask CSRF protection
+
     pip3 install Flask-WTF
-    
-To be able to run the tests 
+
+To be able to run the tests
+
     sudo apt install python3-pytest
 
 
@@ -72,9 +74,9 @@ For more information see: [Penguin Tutor guide to starting programs automaticall
 
 # Security
 
-The pixel server is designed to support varying levels of security depending upon your system requirements. 
+The pixel server is designed to support varying levels of security depending upon your system requirements.
 
-If used on a private only network then it can be configured for network address authentication. 
+If used on a private only network then it can be configured for network address authentication.
 
 If allowing incoming connections from the Internet then it is recommended that user authentication is enabled and it is configured through SSL. The configuration below is based on using Nginx as a reverse proxy to provide HTTPS using a LetsEncrypt certificate.
 
@@ -103,7 +105,7 @@ ln -s to /etc/nginx/sites-enabled
 
 
 Add the following in a location file (this assumes using /rpi1/ as the route
-for this particular server. 
+for this particular server.
 
     location /rpi1/ {
         proxy_set_header X-Real-IP $remote_addr;
@@ -208,7 +210,7 @@ SK6812W_STRIP
 Controls authentication. Can have one or more of the following, which can be a single IP address, or a network subnet, multiple addresses or network subnets (comma seperated) or 0.0.0.0 (all addresses)
 Multiple entries will be appended to the access.
 
-proxy_server = 
+proxy_server =
 Any addresses in this range will be treated as proxy servers.
 If the proxy server has X-Real-IP set then that will be used instead of the local ip address of the server. Warning if that is not a proxy server then this
 could be a security risk (in terms of allowing non authenticated logins). Cannot be 0.0.0.0 (everywhere is a proxy doesn't make sense) - normally this will be specific IP address rather than range.

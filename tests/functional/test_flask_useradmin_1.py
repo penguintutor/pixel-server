@@ -9,7 +9,7 @@ import shutil
 # use csrf_enable = False in create_app() for any posts
 
 # For log debugging use debug=True in create_app()
-#  then using logging.debug 
+#  then using logging.debug
 
 # Users tmp_path_factory - files will be copied to:
 #/tmp/pytest-of-<username>/pytest-current/log?/pixelserver.log
@@ -22,12 +22,12 @@ log_filename = "pixelserver.log"
 # name of config files - will be mapped to temp directory
 # In tests use configs{} instead.
 config_filenames = {
-    'default' : "defaults.cfg",
-    'custom' : "pixelserver.cfg",
-    'sha256' : "sha256.cfg",
-    'light' : "customlight.cfg",
-    'auth' : "auth.cfg",
-    'users' : "users.cfg"
+    'default' : "defaults_test.cfg",
+    'custom' : "pixelserver_test.cfg",
+    'sha256' : "sha256_test.cfg",
+    'light' : "customlight_test.cfg",
+    'auth' : "auth_test.cfg",
+    'users' : "users_test.cfg"
 }
 
 
@@ -36,7 +36,7 @@ config_filenames = {
 configs = {}
 
 def tmp_dir_setup (tmp_path_factory):
-    global _log_directory, _log_filename, _config_directory 
+    global _log_directory, _log_filename, _config_directory
     _log_directory = str(tmp_path_factory.mktemp("log"))
     _log_filename = _log_directory + "/" + log_filename
     _config_directory = str(tmp_path_factory.mktemp("config"))
@@ -45,7 +45,7 @@ def tmp_dir_setup (tmp_path_factory):
         configs[key] = _config_directory + "/" + value
         # copy existing file to new location
         shutil.copyfile(_config_src_directory + value, configs[key])
-        
+
 
 # Setup path factory and empty user file
 def test_setup_factory(tmp_path_factory):
@@ -124,8 +124,8 @@ def test_add_user_1():
             }, follow_redirects=True)
         assert response.status_code == 200
         assert '<input type="text" id="username" name="username" value="newuser1">' in str(response.data)
-        
-# Adds a new admin user 
+
+# Adds a new admin user
 # Uses sha256
 def test_add_user_2():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
@@ -172,7 +172,7 @@ def test_add_user_2():
         assert response.status_code == 200
         # Check returns to user table - but not check admin is set at this point
         assert '<table id="users">' in str(response.data)
-        # Load the edituser and check admin set 
+        # Load the edituser and check admin set
         response = test_client.get('/edituser', query_string={
                 "user" : "adminuser",
                 "action" : "edit"
@@ -180,9 +180,9 @@ def test_add_user_2():
         assert response.status_code == 200
         # check admin is set
         assert '<input type="checkbox" name="admin" checked="checked">' in str(response.data)
-        
-        
-# Adds a new standard user 
+
+
+# Adds a new standard user
 # Uses sha256
 def test_add_user_3():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
@@ -228,7 +228,7 @@ def test_add_user_3():
         assert response.status_code == 200
         # Check returns to user table - but not check admin is set at this point
         assert '<table id="users">' in str(response.data)
-        # Load the edituser and check admin set 
+        # Load the edituser and check admin set
         response = test_client.get('/edituser', query_string={
                 "user" : "stduser",
                 "action" : "edit"
@@ -236,7 +236,7 @@ def test_add_user_3():
         assert response.status_code == 200
         # check admin is set
         assert '<input type="checkbox" name="admin">' in str(response.data)
-        
+
 # Test above users works
 def test_user_added_1():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
@@ -399,7 +399,7 @@ def test_add_user_duplicate_1():
         assert 'User already exists, please try another username' in str(response.data)
 
 
-        
+
 # Adds a user - too short(fail)
 def test_add_user_tooshort_1():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
@@ -425,7 +425,7 @@ def test_add_user_tooshort_1():
         assert response.status_code == 200
         assert 'Username must be minimum of 6 characters' in str(response.data)
 
-        
+
 # Adds a user - special character(fail)
 def test_add_user_invalidchar_1():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
@@ -450,7 +450,7 @@ def test_add_user_invalidchar_1():
             }, follow_redirects=True)
         assert response.status_code == 200
         assert 'Username must be letters and digits only' in str(response.data)
-        
+
 # Adds a user - special character(fail)
 def test_add_user_invalidchar_2():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)
@@ -475,7 +475,7 @@ def test_add_user_invalidchar_2():
             }, follow_redirects=True)
         assert response.status_code == 200
         assert 'Username must be letters and digits only' in str(response.data)
-        
+
 # Adds a user - special character(fail)
 def test_add_user_invalidchar_3():
     app = create_app(configs['auth'], configs['users'], _log_filename, csrf_enable=False, debug=True)

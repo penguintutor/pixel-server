@@ -12,7 +12,7 @@ import random
 # use csrf_enable = False in create_app() for any posts
 
 # For log debugging use debug=True in create_app()
-#  then using logging.debug 
+#  then using logging.debug
 
 # Users tmp_path_factory - files will be copied to:
 #/tmp/pytest-of-<username>/pytest-current/log?/pixelserver.log
@@ -35,12 +35,12 @@ data_file ="tests/data/usertests.json"
 # name of config files - will be mapped to temp directory
 # In tests use configs{} instead.
 config_filenames = {
-    'default' : "defaults.cfg",
-    'custom' : "pixelserver.cfg",
-    'sha256' : "sha256.cfg",
-    'light' : "customlight.cfg",
-    'auth' : "auth.cfg",
-    'users' : "users.cfg"
+    'default' : "defaults_test.cfg",
+    'custom' : "pixelserver_test.cfg",
+    'sha256' : "sha256_test.cfg",
+    'light' : "customlight_test.cfg",
+    'auth' : "auth_test.cfg",
+    'users' : "users_test.cfg"
 }
 
 
@@ -49,7 +49,7 @@ config_filenames = {
 configs = {}
 
 def tmp_dir_setup (tmp_path_factory):
-    global _log_directory, _log_filename, _config_directory 
+    global _log_directory, _log_filename, _config_directory
     _log_directory = str(tmp_path_factory.mktemp("log"))
     _log_filename = _log_directory + "/" + log_filename
     _config_directory = str(tmp_path_factory.mktemp("config"))
@@ -58,7 +58,7 @@ def tmp_dir_setup (tmp_path_factory):
         configs[key] = _config_directory + "/" + value
         # copy existing file to new location
         shutil.copyfile(_config_src_directory + value, configs[key])
-        
+
 
 # Setup path factory and empty user file
 def test_setup_factory(tmp_path_factory):
@@ -109,7 +109,7 @@ def test_password_changer_1():
             assert 'Password changed' in str(response.data)
             # Swap to new password
             current_password = new_password
-            # logout 
+            # logout
             response = test_client.get('/logout')
             assert response.status_code == 200
             assert "Logged out" in str(response.data)
@@ -121,7 +121,7 @@ def test_password_changer_1():
                 }, follow_redirects=True)
         assert response.status_code == 200
         eval_string = '<button type="button" id="profilebutton" onclick="profile()">{}</button>'.format(username)
-        assert eval_string in str(response.data) 
+        assert eval_string in str(response.data)
         # Restore original password
         new_password = first_password
         response = test_client.post("/password", data={
@@ -134,7 +134,7 @@ def test_password_changer_1():
         assert 'Password changed' in str(response.data)
         # Swap to new password
         current_password = new_password
-        # logout 
+        # logout
         response = test_client.get('/logout')
         assert response.status_code == 200
         assert "Logged out" in str(response.data)
@@ -146,7 +146,7 @@ def test_password_changer_1():
                 }, follow_redirects=True)
         assert response.status_code == 200
         eval_string = '<button type="button" id="profilebutton" onclick="profile()">{}</button>'.format(username)
-        assert eval_string in str(response.data) 
+        assert eval_string in str(response.data)
 
 
 # Test with long passwords (10 x)
@@ -192,7 +192,7 @@ def test_password_change_long_1():
             assert 'Password changed' in str(response.data)
             # Swap to new password
             current_password = new_password
-            # logout 
+            # logout
             response = test_client.get('/logout')
             assert response.status_code == 200
             assert "Logged out" in str(response.data)
@@ -204,7 +204,7 @@ def test_password_change_long_1():
                 }, follow_redirects=True)
         assert response.status_code == 200
         eval_string = '<button type="button" id="profilebutton" onclick="profile()">{}</button>'.format(username)
-        assert eval_string in str(response.data) 
+        assert eval_string in str(response.data)
         # Restore original password
         new_password = first_password
         response = test_client.post("/password", data={
@@ -217,7 +217,7 @@ def test_password_change_long_1():
         assert 'Password changed' in str(response.data)
         # Swap to new password
         current_password = new_password
-        # logout 
+        # logout
         response = test_client.get('/logout')
         assert response.status_code == 200
         assert "Logged out" in str(response.data)
@@ -229,7 +229,7 @@ def test_password_change_long_1():
                 }, follow_redirects=True)
         assert response.status_code == 200
         eval_string = '<button type="button" id="profilebutton" onclick="profile()">{}</button>'.format(username)
-        assert eval_string in str(response.data) 
+        assert eval_string in str(response.data)
 
 # check with passwords that are too short
 def test_short_passwords_1():
@@ -313,7 +313,7 @@ def test_noletter_passwords_1():
 def _create_valid_password (max_chars = 20):
     # First create totally random string
     password = ''.join(random.choice(allowed_chars) for i in range(random.randint(8,max_chars)))
-    # strip spaces from end 
+    # strip spaces from end
     password = password.strip()
     # If no alpha add one to end
     if not _has_lowercase(password):
@@ -326,9 +326,9 @@ def _create_valid_password (max_chars = 20):
     while (len(password) < 8):
         password += random.choice(string.printable)
     return password
-    
-    
-            
+
+
+
 def _has_digit (string):
     for i in list(string):
         if i.isdigit():
@@ -340,7 +340,7 @@ def _has_lowercase (string):
         if i.islower():
             return True
     return False
-    
+
 def _has_uppercase (string):
     for i in list(string):
         if i.isupper():
