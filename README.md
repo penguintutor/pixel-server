@@ -233,6 +233,9 @@ This code is in development and may change in operation. Details of significant 
 
 # Change log
 
+## August 2022 - v0.1.0
+Authentication merged into main branch. 
+
 ## July 2022
 Authentication and logging enabled. This is a significant change which brings in additional security. Changes may be needed to user configuration files as well as generating a new user to administer the system.
 
@@ -258,7 +261,7 @@ If you installed the software using a _git clone_ then you can update by issuing
 
 As long as you followed the instructions regarding using a custom configuration file, then your config will still be kept.
 
-If upgrading from a version prior to July 2022 then you may need to create a new configuration file for auth.cfg and a new users.cfg file using createadmin.py
+If upgrading from a version prior to September 2022 then you may need to create a new configuration file for auth.cfg and a new users.cfg file using createadmin.py
 
 # Development
 
