@@ -24,8 +24,10 @@ class ServerAuth ():
         # Load the config file - this will include any network authorizations
         success = self.load_config ()
         if (success == 0):
-            #print ("No authentication config file "+self.config_filename)
+            print ("No authentication config file "+self.config_filename)
             logging.warning("No authentication config file "+ self.config_filename)
+            # If not config file then uses a single entry - login required
+            self.update_network("auth", "0.0.0.0")
         elif (success < 1):
             #print ("Error loading authentication config file "+self.config_filename)
             #print (self.error_msg)

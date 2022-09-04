@@ -70,3 +70,9 @@ def test_login_user_fail_5():
     server_auth = ServerAuth(_auth_filename, _user_filename)
     result = server_auth.login_user ("stduser2", "pixel1login2:test", "192.168.2.2")
     assert result == False
+    
+# Make sure still works for login if no auth.cfg config file
+def test_noauthcfg_user_1():
+    server_auth = ServerAuth("no_auth_file.cfg", _user_filename)
+    result = server_auth.login_user ("admin", "pixel1login2", "192.168.2.2")
+    assert result == True

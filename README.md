@@ -206,8 +206,10 @@ SK6812_STRIP
 SK6812W_STRIP
 
 
-# Auth.cfg
-Controls authentication. Can have one or more of the following, which can be a single IP address, or a network subnet, multiple addresses or network subnets (comma seperated) or 0.0.0.0 (all addresses)
+# auth.cfg
+Controls authentication. There is no auth.cfg by default, which results in all users needing to login, available from any network.
+
+Can have one or more of the following, which can be a single IP address, or a network subnet, multiple addresses or network subnets (comma seperated) or 0.0.0.0 (all addresses)
 Multiple entries will be appended to the access.
 
 proxy_server =
@@ -225,6 +227,16 @@ Must always be a logged in user to change the light status
 normally this is 0.0.0.0 = allow all, but with authentication
 
 Note that to perform any adminstration tasks then must be in either of the above - but must also be authenticated.
+
+## Example auth.cfg
+For a typical authentication file which allows unauthenicated from the localhost and requires login from all other hosts then save the following into a file called auth.cfg
+
+    # Authentication rules for Pixel Server
+    # Following addresses can access without authentication
+    network_allow_always = 127.0.0.1
+    # Following allowed, but need to authenticate
+    # 0.0.0.0 = all addresses
+    network_allow_auth = 0.0.0.0
 
 
 # Updates and changes
