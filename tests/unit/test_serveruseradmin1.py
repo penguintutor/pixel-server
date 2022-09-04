@@ -1,11 +1,11 @@
 from pixelserver.serveruseradmin import ServerUserAdmin
 
-_test_user_file = "user.cfg" 
+_test_user_file = "user_test.cfg" 
 _user_filename = None
 
 def tmp_dir_setup (tmp_path_factory):
     global _user_filename
-    _user_filename = str(tmp_path_factory.mktemp("users") / "user.cfg")
+    _user_filename = str(tmp_path_factory.mktemp("users") / _test_user_file)
 
 # Setup path factory and empty user file
 def test_setup_factory(tmp_path_factory):
