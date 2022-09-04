@@ -138,7 +138,11 @@ There are no users setup as default. Before you can login then you should create
 
     python3 createadmin.py <username> <password> >> users.cfg
 
-The angled brackets should not be included around the username or password. The double greater than symbols will append to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up with multiple users with the same username using this command. Instead once you have setup the initial user you should login through the web interface to configure additional users.
+The angled brackets should not be included around the username or password. The double greater than symbols will append 
+to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up 
+with multiple users with the same username using this command. Instead once you have setup the initial user you should 
+login through the web interface to configure additional users. It is recommended that you restart the server after 
+creating the initial admin login, if not then you will continue to get warnings about having no users setup.
 
 # Automation
 
