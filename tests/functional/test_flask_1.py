@@ -27,6 +27,9 @@ auth_config_noguest = "tests/configs/auth-noguest_test.cfg"
 auth_config_none = "tests/configs/auth-allownone_test.cfg"
 auth_config_proxy = "tests/configs/auth-proxy_test.cfg"
 
+# file does not exist
+auth_users_nofile = "tests/configs/users_notexist_test.cfg"
+
 
 def tmp_dir_setup (tmp_path_factory):
     global _log_directory, _log_filename
@@ -147,3 +150,5 @@ def test_login_fail_3():
             }, follow_redirects=True)
         assert response.status_code == 200
         assert 'Invalid login attempt' in str(response.data)
+        
+        

@@ -14,40 +14,65 @@ from pixelserver.serveruser import ServerUser
 class ServerAuth ():
     
     def __init__ (self, auth_filename, users_filename):
-        self.config_filename = auth_filename
+        self.user_file_exists = False       # check that the user file exists and has at least one entry - otherwise we give user an error message
+        self.auth_filename = auth_filename
         self.users_filename = users_filename
         self.error_msg = ""              # Add any error messages for reporting
         self.proxy_servers = []         # List of proxy servers where X-Real-IP will be used
         self.network_allow_always = []          # list of allowed network addresses which don't require authentication (normally this is local addresses only)
         self.network_allow_auth = []            # as above, but does require authentication (normally this is 0.0.0.0 = allow all, but with authentication
         
-        # Load the config file - this will include any network authorizations
+        # Load the auth.cfg config file - this will include any network authorizations
         success = self.load_config ()
         if (success == 0):
-            print ("No authentication config file "+self.config_filename)
-            logging.warning("No authentication config file "+ self.config_filename)
+            print ("No authentication config file "+self.auth_filename)
+            logging.warning("No authentication config file "+ self.auth_filename)
             # If not config file then uses a single entry - login required
             self.update_network("auth", "0.0.0.0")
         elif (success < 1):
-            #print ("Error loading authentication config file "+self.config_filename)
+            #print ("Error loading authentication config file "+self.auth_filename)
             #print (self.error_msg)
-            logging.error("Error loading config file "+ self.config_filename)
+            logging.error("Error loading config file "+ self.auth_filename)
+
+        self.user_file_exists = self.check_user_file()
 
         logging.info("Authentication loaded")
             
 
+    # Checks that user file exists and has at least one entry
+    # Returns True if exists, otherwise False
+    def check_user_file (self):
+        user_filename = self.users_filename
+        try:
+            with open(user_filename) as read_file:
+                # Read through each entry and if valid return True
+                for line in read_file:
+                    this_line = line.strip()
+                    # check if comment in which case skip
+                    if (this_line.startswith("#")):
+                        continue
+                    # split line into fields
+                    user_elements = this_line.split(":", 5)
+                    # Basic check only - do we have at least 5 fields
+                    if (len(user_elements) >= 5):
+                        return True
+        except Exception as e: 
+            return False
+        # User not found return None
+        return False
 
-    # load config if it exists
+
+    # load auth.cfg config if it exists
     # If not exist return 0, if successful return 1, if not successful return -1 (file error) -2 (data error)
     # After error stop reading rest of file
     # If error also populate self.error_msg
     # Includes some validation checks, but these are very crude
     # to detect mistakes rather than security reasons
     def load_config(self):
-        filename = self.config_filename
+        auth_filename = self.auth_filename
         # Try and open file - if not exist then just return
         try:
-            with open (filename, "r") as cfg_file:
+            with open (auth_filename, "r") as cfg_file:
                 lines = cfg_file.readlines()
                 for line in lines:
                     # remove training / leading chars
@@ -70,14 +95,15 @@ class ServerAuth ():
 
         # File not found 
         except FileNotFoundError:
-            self.errormsg = "File not found "+filename
+            self.errormsg = "File not found "+auth_filename
             return 0
         # Other file read error
         except OSError:
-            self.errormsg = "Error reading file "+filename
+            self.errormsg = "Error reading file "+auth_filename
             return -1
             
         return 1
+
        
         
     # Loads the information about a single user and returns as

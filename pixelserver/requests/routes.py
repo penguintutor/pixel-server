@@ -22,7 +22,6 @@ def main():
     if login_status == "invalid":
         return redirect('/invalid')
     elif login_status == "network":
-        #return ('index.html')
         return render_template('index.html', user="guest", admin=False)
     elif login_status == "logged_in":
         # Also check if admin - to show settings button
@@ -52,7 +51,14 @@ def login():
             return redirect('/')
         return render_template('login.html', message='Invalid login attempt')
     # New visit to login page
-    return render_template('login.html')
+    # Check if user file exists, otherwise give warning message
+    # If another error is received then that will override this, but should not be
+    # an issue as this warning should only ever be seen on first attempt before
+    # users.cfg is created.
+    if (not pixelserver.auth.user_file_exists):
+        return render_template('login.html', message='No users defined or missing users file. Run createadmin.py through the shell to setup an admin user.')
+    else:
+        return render_template('login.html')
     
 @requests_blueprint.route("/logout")
 def logout():
