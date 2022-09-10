@@ -26,5 +26,5 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: macley/oled_stats:latest
+          tags: macley/pixel-server:latest
           platforms: linux/amd64,linux/arm64,linux/arm/v7
