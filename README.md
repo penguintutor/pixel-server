@@ -8,7 +8,7 @@ On older Raspberry Pi models (Raspberry Pi V1 or Raspberry Pi Zero) then it is r
 For more details see:
 <http://www.penguintutor.com/projects/pixel-server>
 
-![NeoPixel web application](http://www.penguintutor.com/projects/images/pixelserver-webapplication.png)
+![NeoPixel web application](https://i.imgur.com/zSwM737.png)
 
 ## Colors
 
