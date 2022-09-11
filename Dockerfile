@@ -13,9 +13,6 @@ RUN apk add libffi-dev build-base linux-headers --no-cache && \
 
 COPY . .
 
-RUN cp defaults.cfg pixelserver.cfg && \
-    touch users.cfg auth.cfg
-
 ENTRYPOINT [ "/bin/sh", "-c", "python pixelserver.py & crond -f" ]
 
 #docker run -d -v auth_cfg:/opt/pixel-server/auth.cfg -v pixel_cfg:/opt/pixel-server/pixelserver.cfg -v user_cfg:/opt/pixel-server/users.cfg -v crontab:/etc/crontabs/root --device=/dev/vcio --cap-add=SYS_RAWIO --device=/dev/mem --security-opt=systempaths=unconfined --security-opt=apparmor=unconfined --device=/dev/spidev0.0 --device=/dev/i2c-1 --device=/dev/gpiomem --restart unless-stopped -p 85:80 --name pixel-server pixel-server
