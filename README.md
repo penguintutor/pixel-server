@@ -152,7 +152,8 @@ If you wish to use this project in a container, you can do so by getting Docker 
 
 First we enable the needed interfaces by doing:
 
-    sudo raspi-config nonint do_spi 0 do_i2c 0
+    sudo raspi-config nonint do_spi 0
+    sudo raspi-config nonint do_i2c 0
     ls /dev/i2c* /dev/spidev0.0
 
 The above command should output:
