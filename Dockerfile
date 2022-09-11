@@ -10,7 +10,8 @@ WORKDIR /opt/pixel-server/
 
 RUN apk add libffi-dev build-base linux-headers --no-cache && \
     pip install --upgrade --no-cache-dir rpi_ws281x RPi.GPIO setuptools argon2_cffi Flask-WTF && \
-    touch pixelserver.cfg users.cfg auth.cfg
+    cp defaults.cfg pixelserver.cfg && \
+    touch users.cfg auth.cfg
 
 COPY . .
 
