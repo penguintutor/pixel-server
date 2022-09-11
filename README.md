@@ -1,4 +1,5 @@
 # pixel-server
+
 Wireless control of PixelStrips or NeoPixels using a web graphical interface running on a Raspberry Pi.
 
 Works with any Raspberry Pi.
@@ -29,7 +30,6 @@ This is designed to run on a Raspberry Pi with PixelStrip / NeoPixels / WS2812B 
 For more details see:
 <http://www.penguintutor.com/projects/pixelstrip>
 
-
 To install the RPI ws281x library:
 
     pip3 install rpi_ws281x
@@ -45,7 +45,6 @@ To install the Flask CSRF protection
 To be able to run the tests
 
     sudo apt install python3-pytest
-
 
 It is recommended to install this program directly from git, which will allow for install of future updates. Note that updates will replace any custom sequences you have created. To provide support for different usernames I recommend installing into the /opt directory.
 
@@ -71,7 +70,6 @@ There is also a video providing a step-by-step guide to installing this on a Ras
 
 For more information see: [Penguin Tutor guide to starting programs automatically on a Raspberry Pi](http://www.penguintutor.com/raspberrypi/startup)
 
-
 # Security
 
 The pixel server is designed to support varying levels of security depending upon your system requirements.
@@ -84,25 +82,22 @@ If allowing incoming connections from the Internet then it is recommended that u
 
 This explains how you can use the Flask (development) server with https using Nginx as a reverse proxy. This uses a free security certificate from [Let's Encrypt](https://letsencrypt.org/). This means that I am able to setup Nginx as a reverse proxy on my home server, which could be used to provide encrypted connections to different services.
 
-
 ### On Nginx reverse proxy
 
 This does not have to be on the same server as pixel-server.
 
 First make sure your system is up-to-date
 
-sudo apt update
-sudo apt upgrade
-sudo apt install nginx
+    sudo apt update
+    sudo apt upgrade
+    sudo apt install nginx
 
-sudo apt install certbot
-sudo apt install python3-certbot-nginx
-
+    sudo apt install certbot
+    sudo apt install python3-certbot-nginx
 
 add new file in sites-available
 
-ln -s to /etc/nginx/sites-enabled
-
+    ln -s to /etc/nginx/sites-enabled
 
 Add the following in a location file (this assumes using /rpi1/ as the route
 for this particular server.
@@ -112,20 +107,22 @@ for this particular server.
         proxy_pass http://<pixelserver_address>/;
     }
 
+Request through certbot your SSL certificate:
 
-sudo certbot --nginx -d <public hostname>
+    sudo certbot --nginx -d <public hostname>
 
 This updates /etc/nginx/sites-enabled
 
-update with
-sudo nginx -t
-sudo nginx -s reload
+Update with
+
+    sudo nginx -t
+    sudo nginx -s reload
 
 Add the following to crontab for root:
-0 12 * * * /usr/bin/certbot renew --quiet
+
+    0 12 * * * /usr/bin/certbot renew --quiet
 
 This checks for updates on a daily basis and if required renew
-
 
 ## Login
 
@@ -133,41 +130,72 @@ New login features requires that users login to the web interface. This would pr
 
 If automation runs on the local machine then it is recommended that only the loopback IP address 127.0.0.1 is pre-authorized, but additional IP addresses can be enabled for use by WiFi switches, such as those used in the [ESP32 wireless capacitive touch switch](http://www.penguintutor.com/projects/esp32-captouch).
 
-
 There are no users setup as default. Before you can login then you should create your first admin user with the following command:
 
     python3 createadmin.py <username> <password> >> users.cfg
 
-The angled brackets should not be included around the username or password. The double greater than symbols will append 
-to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up 
-with multiple users with the same username using this command. Instead once you have setup the initial user you should 
-login through the web interface to configure additional users. It is recommended that you restart the server after 
+The angled brackets should not be included around the username or password. The double greater than symbols will append
+to the users.cfg file, so if the file already exists this will not remove any existing accounts. Ensure you don't end up
+with multiple users with the same username using this command. Instead once you have setup the initial user you should
+login through the web interface to configure additional users. It is recommended that you restart the server after
 creating the initial admin login, if not then you will continue to get warnings about having no users setup.
 
 ### Docker install
 
-If you wish to use this project in a container, you can do so by entering the following commands:
+If you wish to use this project in a container, you can do so by getting Docker first if you don't have it installed yet:
 
-    cd ~
-    sudo mkdir pixel-server
-    sudo chown $USER: pixel-server
-    git clone https://github.com/penguintutor/pixel-server.git pixel-server
 
-Make sure to make changes to your config file, so that the pixel-server knows how to communicate with your neopixel device!
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
+    sudo usermod -aG docker $USER
+    rm get-docker.sh
 
-    docker build . -t pixel-server
-    docker run --restart unless-stopped --privileged -p 80:80 pixel-server
+First we enable the needed interfaces by doing:
 
-This will make the project run on port 80/HTTP and also start on boot.
-To update the container, enter the following commands:
+    sudo raspi-config nonint do_spi 0 do_i2c 0
+    ls /dev/i2c* /dev/spidev0.0
 
+The above command should output:
+
+    /dev/i2c-1  /dev/i2c-20  /dev/i2c-21  /dev/spidev0.0
+
+Next we create a directory and the config files to keep them persistant:
+
+    sudo mkdir /opt/pixel-server/
+    sudo touch /opt/pixel-server/users.cfg 
+    sudo sh -c "echo 'network_allow_auth = 0.0.0.0' > /opt/pixel-server/auth.cfg"
+    sudo wget https://raw.githubusercontent.com/penguintutor/pixel-server/main/defaults.cfg -O /opt/pixel-server/pixelserver.cfg
+
+The above step only has to be done once, otherwise the content will be overwitten.
+
+To run pixel-server with Docker, use the following command:
+
+    docker run -d -v /opt/pixel-server/auth.cfg:/opt/pixel-server/auth.cfg -v /opt/pixel-server/pixelserver.cfg:/opt/pixel-server/pixelserver.cfg -v /opt/pixel-server/users.cfg:/opt/pixel-server/users.cfg -v crontab:/etc/crontabs/ --device=/dev/vcio --cap-add=SYS_RAWIO --device=/dev/mem --security-opt=systempaths=unconfined --security-opt=apparmor=unconfined --device=/dev/spidev0.0 --device=/dev/i2c-1 --device=/dev/gpiomem --restart unless-stopped -p 80:80 --name pixel-server macley/pixel-server
+
+The above command will pull the required image in, make the config files persistant even if you delete the container and adds the minimum required devices/permissions inorder to function properly.
+
+If you don't wish to use port 80, you can change: `-p 80:80` into `-p 81:80`.
+
+You won't be able to login yet, you can create a new user by doing:
+
+    docker exec -it pixel-server sh -c 'python3 createadmin.py <username> <password> >> users.cfg'
+    docker restart pixel-server
+
+The pixel-server container is now running with the latest changes and you can always view them on `/opt/pixel-server/`.
+
+If you wish to update the container when a new image is out, you can do it manually by using:
+
+    docker pull macley/pixel-server
     docker stop pixel-server
     docker rm pixel-server
-    cd ~/pixel-server/
-    git pull
-    docker build . -t pixel-server
-    docker run --restart unless-stopped --privileged -p 80:80 pixel-server
-    
+
+You can then start the container with the run command.
+
+If you wish to automate using crontab inside of the container. You can by doing:
+
+    docker exec -it pixel-server crontab -e
+
+Continue reading how to properly use crontab.
 
 # Automation
 
@@ -193,7 +221,7 @@ For best effect use either a single color in the customlight.cfg file, or the sa
 
 If you would like to have the lights automatically update to the latest cheerlight color then you can add the following line to crontab.
 
-    */5 * * * * wget -O ~/pixel-server/customlight.cfg http://api.thingspeak.com/channels/1417/field/2/last.txt
+    */5     *       *       *       *       wget -O /opt/pixel-server/customlight.cfg http://api.thingspeak.com/channels/1417/field/2/last.txt
 
 The ~ assumes that this is installed in your home directory.
 
@@ -213,6 +241,7 @@ The following parameters can be used:
 * striptype - Set to colour sequence or strip type
 
 ## Valid strip types
+
 The striptype can be set using a color sequence. For WS2811 / WS2812B strips then this should be three letters representing the order of the RGB colours eg. _GRB_ for green, red then blue.
 
 For SK6812 strips then it should be four letters also including W for white. eg. _GRBW_ for green, red, blue and then white.
@@ -234,8 +263,8 @@ SK6812_STRIP_BGRW
 SK6812_STRIP
 SK6812W_STRIP
 
-
 # auth.cfg
+
 Controls authentication. There is no auth.cfg by default, which results in all users needing to login, available from any network.
 
 Can have one or more of the following, which can be a single IP address, or a network subnet, multiple addresses or network subnets (comma seperated) or 0.0.0.0 (all addresses)
@@ -247,7 +276,6 @@ If the proxy server has X-Real-IP set then that will be used instead of the loca
 could be a security risk (in terms of allowing non authenticated logins). Cannot be 0.0.0.0 (everywhere is a proxy doesn't make sense) - normally this will be specific IP address rather than range.
 If the attempt from the proxy server does not have X-Real_IP then the address will be treated as coming from that IP address.
 
-
 network_allow_always =
 Allways allow without login (useful for automation or local)
 
@@ -258,6 +286,7 @@ normally this is 0.0.0.0 = allow all, but with authentication
 Note that to perform any adminstration tasks then must be in either of the above - but must also be authenticated.
 
 ## Example auth.cfg
+
 For a typical authentication file which allows unauthenicated from the localhost and requires login from all other hosts then save the following into a file called auth.cfg
 
     # Authentication rules for Pixel Server
@@ -267,7 +296,6 @@ For a typical authentication file which allows unauthenicated from the localhost
     # 0.0.0.0 = all addresses
     network_allow_auth = 0.0.0.0
 
-
 # Updates and changes
 
 This code is in development and may change in operation. Details of significant changes will be included here.
@@ -275,9 +303,11 @@ This code is in development and may change in operation. Details of significant 
 # Change log
 
 ## August 2022 - v0.1.0
-Authentication merged into main branch. 
+
+Authentication merged into main branch.
 
 ## July 2022
+
 Authentication and logging enabled. This is a significant change which brings in additional security. Changes may be needed to user configuration files as well as generating a new user to administer the system.
 
 You may need to install additional libraries including the following commands:
@@ -286,15 +316,13 @@ You may need to install additional libraries including the following commands:
     sudo apt install python3-argon2
     sudo pip3 install Flask-WTF
 
-
-
 ## May 2022
+
 Additional color option of "Custom Color". This allows custom colors to be used through a custom.light.cfg file. This is particularly useful if you want to be able to control color using cheerlights or would like to provide your own home automation with non-volitile color changes.
 
-
 ## April 2022
-When setting a sequence the server will now respond with a JSON formatted status replacing the previous single word "ready" or simple error message. This provides feedback on the status of the request as well as what sequence is currently being displayed.
 
+When setting a sequence the server will now respond with a JSON formatted status replacing the previous single word "ready" or simple error message. This provides feedback on the status of the request as well as what sequence is currently being displayed.
 
 # Upgrading to the latest version
 
