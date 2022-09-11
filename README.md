@@ -149,6 +149,7 @@ If you wish to use this project in a container, you can do so by getting Docker 
     sudo sh get-docker.sh
     sudo usermod -aG docker $USER
     rm get-docker.sh
+    exit # logout and back in for changes to take effect!
 
 First we enable the needed interfaces by doing:
 
