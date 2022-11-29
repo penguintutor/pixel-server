@@ -42,17 +42,17 @@ class SeqList():
              },
             {"seq_name" :"chaser",
              "title": "Chaser",
-             "description" : "Flash all LEDs on and off",
+             "description" : "Chaser wipes across the strip ",
              "group" : 0
              },
              {"seq_name" :"chaserchangecolor",
              "title": "Chaser Change Color",
-             "description" : "Flash all LEDs on and off",
+             "description" : "Chaser 4 Off, 4 On changing colour at a time",
              "group" : 1
              },
              {"seq_name" :"chaserbackground",
              "title": "Chaser Solid Background",
-             "description" : "Chaser sequence one block of colour across black background",
+             "description" : "Single block across screen, if single color then 4 pixels ",
              "group" : 1
              },
              {"seq_name" :"chaserfillend",
@@ -342,7 +342,7 @@ class PixelSeq():
         
     # chaser with black background
     # If multiple colours then a single block of colours goes across the strip
-    # If single color selected then show 4 LEDs on, followed by 4 LEDs off
+    # If single color selected then show 4 LEDs on
     def chaserBackground(self, seq_position, reverse, colors):
         # if single color selected then create a separate array with 4 x colors
         if (len(colors) < 2):
