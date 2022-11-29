@@ -277,7 +277,16 @@ If you installed the software using a _git clone_ then you can update by issuing
 
 As long as you followed the instructions regarding using a custom configuration file, then your config will still be kept.
 
-If upgrading from a version prior to September 2022 then you may need to create a new configuration file for auth.cfg and a new users.cfg file using createadmin.py
+If upgrading from a version prior to September 2022 you may need to add the following pre-requisites if not already installed:
+
+    sudo apt install python3-argon2
+    sudo pip3 install Flask-WTF
+
+Then you will need to create a login using the createadmin.py script explained under the install instructions. 
+
+    python3 createadmin.py <username> <password> >> users.cfg
+
+You may also need to create a new configuration file for auth.cfg
 
 # Development
 
